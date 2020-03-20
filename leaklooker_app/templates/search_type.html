@@ -1,0 +1,395 @@
+
+<!doctype html>
+<html class="no-js" lang="">
+{% load static %}
+{% block page_content %}
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>LeakLooker | Search</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- favicon
+		============================================ -->
+    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
+    <!-- Google Fonts
+		============================================ -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
+    <!-- Bootstrap CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- Bootstrap CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <!-- owl.carousel CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.transitions.css' %}">
+    <!-- meanmenu CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/meanmenu/meanmenu.min.css' %}">
+    <!-- animate CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <!-- normalize CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <!-- mCustomScrollbar CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/scrollbar/jquery.mCustomScrollbar.min.css' %}">
+    <!-- notika icon CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/notika-custom-icon.css' %}">
+    <!-- wave CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/wave/waves.min.css' %}">
+    <!-- main CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <!-- style CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- responsive CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <!-- modernizr JS
+		============================================ -->
+    <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
+</head>
+
+<body>
+    <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <!-- Start Header Top Area -->
+    <div class="header-top-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="logo-area">
+                        <a href="{% url 'index' %}"><img src="{% static 'img/ll.png' %}" /></a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- End Header Top Area -->
+    <!-- Mobile Menu start -->
+
+    <!-- Mobile Menu end -->
+    <!-- Main Menu area start-->
+    <div class="main-menu-area mg-tb-40">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
+                        <li ><a href="{% url 'index' %}"><i class="notika-icon notika-house"></i> Home</a>
+                        </li>
+                        <li><a data-toggle="tab" href="#search"><i class="notika-icon notika-search"></i> Search</a>
+                        </li>
+                        <li><a href="{% url 'database' %}"><i class="notika-icon notika-edit"></i> Database</a>
+                        </li>
+                        <li><a href="{% url 'notifications' %}"><i class="notika-icon notika-app"></i> Monitor</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content custom-menu-content">
+                        <div id="Home" class="tab-pane in active notika-tab-menu-bg animated flipInX">
+
+                        </div>
+                        <div id="search" class="tab-pane notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li><a href="{% url 'keyword' %}">Keyword</a>
+                                </li>
+                                <li><a href="{% url 'type' %}">Type</a>
+                                </li>
+                            </ul>
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Menu area End-->
+
+	<!-- Breadcomb area End-->
+    <!-- Color area Start-->
+        <div class="contact-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+              <center>      <div class="contact-list">
+<img src="{% static 'img/gitlab.png' %}">
+                                <a href="{% url 'search' type='gitlab' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+
+                                                                <a href="{% url 'browse' type='gitlab' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                                <br>
+                                <br>
+                                                                <a id="count" name='gitlab' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='gitlab' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+
+                    </div></center>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <center>   <div class="contact-list">
+
+
+                                <img src="{% static 'img/elasti.png' %}"><br>
+                             <a href="{% url 'search' type='elastic' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                                <a href="{% url 'browse' type='elastic' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                        <br>
+                                <br>
+                        <a id="count" name='elastic' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='elastic' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+
+
+
+                    </div></center></div>
+
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                 <center>   <div class="contact-list">
+
+
+
+<img src="{% static 'img/kibana.png' %}">
+                                <a href="{% url 'search' type='kibana' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                                <a href="{% url 'browse' type='kibana' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                    <br> <br>      <a id="count" name='kibana' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='kibana' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+
+
+                    </div></center></div>
+
+
+                     <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                 <center>   <div class="contact-list">
+
+
+                                <img src="{% static 'img/jenkins.png' %}">
+                                <a href="{% url 'search' type='jenkins' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                                <a href="{% url 'browse' type='jenkins' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                     <br>
+                                <br>   <a id="count" name='jenkins' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='jenkins' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+
+
+
+                    </div></center>
+                     </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+               <center>     <div class="contact-list mg-t-30">
+
+
+                                <img src="{% static 'img/mongodb.jpg' %}">
+                                <a href="{% url 'search' type='mongo' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                                <a href="{% url 'browse' type='mongo' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                  <br>
+                                <br>      <a id="count" name='mongo' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='mongo' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+                    </div></center>
+                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+         <center>           <div class="contact-list mg-t-30">
+
+
+                                <img src="{% static 'img/sonarqube.jpeg' %}">
+                                <a href="{% url 'search' type='sonarqube' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                               <a href="{% url 'browse' type='sonarqube' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                <br> <br>          <a id="count" name='sonarqube' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='sonarqube' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+
+                    </div></center>
+                </div>
+
+                                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <center>        <div class="contact-list mg-t-30">
+
+
+                                <img src="{% static 'img/rsync.jpg' %}">
+                                <a href="{% url 'search' type='rsync' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                 <a href="{% url 'browse' type='rsync' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                  <br> <br>        <a id="count" name='rsync' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='rsync' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+                    </div></center>
+                </div>
+
+                                                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+           <center>         <div class="contact-list mg-t-30">
+
+ <img src="{% static 'img/dirs.png' %}">
+                                <a href="{% url 'search' type='dirs' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                                <a href="{% url 'browse' type='dirs' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                       <br>
+                                <br> <a id="count" name='dirs' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='dirs' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+
+                    </div></center>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+    <center>                <div class="contact-list mg-t-30">
+
+
+
+
+<img src="{% static 'img/cassandra.jpg' %}">
+                                <a href="{% url 'search' type='cassandra' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                                <a href="{% url 'browse' type='cassandra' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+              <br> <br>            <a id="count" name='cassandra' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='cassandra' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+
+                    </div></center>
+                </div>
+
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <center>        <div class="contact-list mg-t-30">
+
+<img src="{% static 'img/couchdb.png' %}">
+                <br><br>
+                                <a href="{% url 'search' type='couchdb' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                                <a href="{% url 'browse' type='couchdb' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                  <br> <br>        <a id="count" name='couchdb' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='couchdb' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+                    </div></center>
+                </div>
+
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+            <center>        <div class="contact-list mg-t-30">
+
+
+                                <img src="{% static 'img/rethink.svg' %}">
+                <br><br>
+                                <a href="{% url 'search' type='rethink' %}" class="btn btn-info notika-btn-info waves-effect">Search</a>
+                                                                <a href="{% url 'browse' type='rethink' %}" class="btn btn-warning notika-btn-warning waves-effect">Browse</a>
+                 <br> <br>         <a id="count" name='rethink' class="btn btn-info notika-btn-info waves-effect">Count</a>
+ <a id="count_db" name='rethink' class="btn btn-warning notika-btn-warning waves-effect    ">Count</a>
+
+                    </div></center>
+                </div>
+
+            </div>
+        </div>
+        </div>
+
+    <!-- Color area End-->
+    <!-- Start Footer area-->
+    <div class="footer-copyright-area">
+
+    </div>
+    <!-- End Footer area-->
+    <!-- jquery
+		============================================ -->
+    <script src="{% static 'js/vendor/jquery-1.12.4.min.js' %}"></script>
+    <!-- bootstrap JS
+		============================================ -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- wow JS
+		============================================ -->
+    <script src="{% static 'js/wow.min.js' %}"></script>
+    <!-- price-slider JS
+		============================================ -->
+    <script src="{% static 'js/jquery-price-slider.js' %}"></script>
+    <!-- owl.carousel JS
+		============================================ -->
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <!-- scrollUp JS
+		============================================ -->
+    <script src="{% static 'js/jquery.scrollUp.min.js' %}"></script>
+    <!-- meanmenu JS
+		============================================ -->
+    <script src="{% static 'js/meanmenu/jquery.meanmenu.js' %}"></script>
+    <!-- counterup JS
+		============================================ -->
+    <script src="{% static 'js/counterup/jquery.counterup.min.js' %}"></script>
+    <script src="{% static 'js/counterup/waypoints.min.js' %}"></script>
+    <script src="{% static 'js/counterup/counterup-active.js' %}"></script>
+    <!-- mCustomScrollbar JS
+		============================================ -->
+    <script src="{% static 'js/scrollbar/jquery.mCustomScrollbar.concat.min.js' %}"></script>
+    <!-- jvectormap JS
+		============================================ -->
+    <!-- sparkline JS
+		============================================ -->
+    <script src="{% static 'js/sparkline/jquery.sparkline.min.js' %}"></script>
+    <script src="{% static 'js/sparkline/sparkline-active.js' %}"></script>
+    <!-- sparkline JS
+		============================================ -->
+    <script src="{% static 'js/flot/jquery.flot.js' %}"></script>
+    <script src="{% static 'js/flot/jquery.flot.resize.js' %}"></script>
+    <script src="{% static 'js/flot/curvedLines.js' %}"></script>
+    <script src="{% static 'js/flot/flot-active.js' %}"></script>
+    <!-- knob JS
+		============================================ -->
+    <script src="{% static 'js/knob/jquery.knob.js' %}"></script>
+    <script src="{% static 'js/knob/jquery.appear.js' %}"></script>
+    <script src="{% static 'js/knob/knob-active.js' %}"></script>
+    <!--  wave JS
+		============================================ -->
+    <script src="{% static 'js/wave/waves.min.js' %}"></script>
+    <script src="{% static 'js/wave/wave-active.js' %}"></script>
+
+    <!-- plugins JS
+		============================================ -->
+    <script src="{% static 'js/plugins.js' %}"></script>
+
+    <!-- main JS
+		============================================ -->
+    <script src="{% static 'js/main.js' %}"></script>
+	<!-- tawk chat JS
+		============================================ -->
+
+<script>
+$('.btn-info').click(function() {
+ //so that we stop normal form submit.
+let type = $(this).attr('name');
+ aaa = $(this);
+
+    $.ajax({
+             url: "/search/stats/" +type,
+             type: 'GET',
+             success:  function(response) {
+                    aaa[0].innerHTML = response['Results'];
+                }
+})});
+</script>
+
+<script>
+$('.btn-warning').click(function() {
+ //so that we stop normal form submit.
+ let type = $(this).attr('name');
+ aaa = $(this);
+    $.ajax({
+             url: "/search/stats/db/"+type,
+             type: 'GET',
+             success:  function(response) {
+                    aaa[0].innerHTML = response['Results'];
+                }
+})});
+</script>
+</body>
+
+</html>
+{% endblock %}

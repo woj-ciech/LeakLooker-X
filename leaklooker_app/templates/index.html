@@ -1,0 +1,411 @@
+
+<!doctype html>
+<html class="no-js" lang="">
+{% load static %}
+{% block page_content %}
+
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>LeakLooker | Dashboard </title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- favicon
+		============================================ -->
+    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
+    <!-- Google Fonts
+		============================================ -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900" rel="stylesheet">
+    <!-- Bootstrap CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <!-- Bootstrap CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <!-- owl.carousel CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.transitions.css' %}">
+    <!-- meanmenu CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/meanmenu/meanmenu.min.css' %}">
+    <!-- animate CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <!-- normalize CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <!-- mCustomScrollbar CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/scrollbar/jquery.mCustomScrollbar.min.css' %}">
+    <!-- jvectormap CSS
+		============================================ -->
+
+    <link rel="stylesheet" href="{% static 'css/notika-custom-icon.css' %}">
+    <!-- wave CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/wave/waves.min.css' %}">
+    <!-- main CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <!-- style CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- responsive CSS
+		============================================ -->
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <!-- modernizr JS
+		============================================ -->
+    <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
+</head>
+
+<body>
+    <!--[if lt IE 8]>
+            <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <!-- Start Header Top Area -->
+    <div class="header-top-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="logo-area">
+                        <a href="{% url 'index' %}"><img src="{% static 'img/ll.png' %}" /></a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- End Header Top Area -->
+    <!-- Mobile Menu start -->
+
+    <!-- Mobile Menu end -->
+    <!-- Main Menu area start-->
+    <div class="main-menu-area mg-tb-40">
+       <div class="container">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
+                        <li class="active"><a href="{% url 'index' %}"><i class="notika-icon notika-house"></i> Home</a>
+                        </li>
+                        <li><a data-toggle="tab" href="#search"><i class="notika-icon notika-search"></i> Search</a>
+                        </li>
+                        <li><a href="{% url 'database' %}"><i class="notika-icon notika-edit"></i> Database</a>
+                        </li>
+                        <li><a href="{% url 'notifications' %}"><i class="notika-icon notika-app"></i> Monitor</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content custom-menu-content">
+                        <div id="Home" class="tab-pane in active notika-tab-menu-bg animated flipInX">
+
+                        </div>
+                        <div id="search" class="tab-pane notika-tab-menu-bg animated flipInX">
+                            <ul class="notika-main-menu-dropdown">
+                                <li><a href="{% url 'keyword' %}">Keyword</a>
+                                </li>
+                                <li><a href="{% url 'type' %}">Type</a>
+                                </li>
+                            </ul>
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Menu area End-->
+    <!-- Start Status area -->
+    <div class="notika-status-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="wb-traffic-inner notika-shadow sm-res-mg-t-30 tb-res-mg-t-30">
+                        <div class="website-traffic-ctn">
+                            <h2><span class="counter">{{ credits }}</span></h2>
+                            <p>Binary Edge credits</p>
+                        </div>
+                        <div class="sparkline-bar-stats1">9,4,8,6,5,6,4,8,3,5,9,5</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="wb-traffic-inner notika-shadow sm-res-mg-t-30 tb-res-mg-t-30">
+                        <div class="website-traffic-ctn">
+                            <h2><span class="counter">{{ for_later_counter }}</span></h2>
+                            <p>For later review</p>
+                        </div>
+                        <div class="sparkline-bar-stats2">1,4,8,3,5,6,4,8,3,3,9,5</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="wb-traffic-inner notika-shadow sm-res-mg-t-30 tb-res-mg-t-30 dk-res-mg-t-30">
+                        <div class="website-traffic-ctn">
+                            <h2><span class="counter">{{ confirmed_counter }}</span></h2>
+                            <p>Confirmed</p>
+                        </div>
+                        <div class="sparkline-bar-stats3">4,2,8,2,5,6,3,8,3,5,9,5</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="wb-traffic-inner notika-shadow sm-res-mg-t-30 tb-res-mg-t-30 dk-res-mg-t-30">
+                        <div class="website-traffic-ctn">
+                            <h2><span class="counter">{{ all_counter }}</span></h2>
+                            <p>In database</p>
+                        </div>
+                        <div class="sparkline-bar-stats4">2,4,8,4,5,7,4,7,3,5,7,5</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Status area-->
+    <!-- Start Sale Statistic area-->
+    <div class="sale-statistic-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9 col-md-8 col-sm-7 col-xs-12" style="width:100%">
+                    <div class="sale-statistic-inner notika-shadow mg-tb-30" >
+                        <div class="curved-inner-pro">
+                            <div class="curved-ctn">
+                                <h2>Statistics</h2>
+                                <p>Number of retrieved databases</p>
+                            </div>
+                        </div>
+                      <div class="bar-chart-wp">
+                        <canvas height="100vh" width="180vw" id="barchart1"></canvas>
+                    </div>
+                    </div>
+                </div>
+
+                </div>
+            </div>
+        </div>
+    <!-- End Sale Statistic area-->
+    <!-- Start Email Statistic area-->
+    <div class="notika-email-post-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                    <div class="email-statis-inner notika-shadow">
+                        <div class="email-ctn-round">
+                            <div class="email-rdn-hd">
+								<h2>Progress</h2>
+							</div>
+                            <div class="email-statis-wrap">
+                                <div class="email-round-nock">
+                                    <input type="text" class="knob" value="0" data-rel="{{ percentages.0 }}" data-linecap="round" data-width="130" data-bgcolor="#E4E4E4" data-fgcolor="#00c292" data-thickness=".10" data-readonly="true">
+                                </div>
+                                <div class="email-ctn-nock">
+                                    <p>checked Elastic</p>
+                                </div>
+                            </div>
+                            <div class="email-round-gp">
+                                <div class="email-round-pro">
+                                    <div class="email-signle-gp">
+                                        <input type="text" class="knob" value="0" data-rel="{{ percentages.1 }}" data-linecap="round" data-width="90" data-bgcolor="#E4E4E4" data-fgcolor="#00c292" data-thickness=".10" data-readonly="true" disabled>
+                                    </div>
+                                    <div class="email-ctn-nock">
+                                        <p>checked Rethink</p>
+                                    </div>
+                                </div>
+                                <div class="email-round-pro">
+                                    <div class="email-signle-gp">
+                                        <input type="text" class="knob" value="0" data-rel="{{ percentages.2 }}" data-linecap="round" data-width="90" data-bgcolor="#E4E4E4" data-fgcolor="#00c292" data-thickness=".10" data-readonly="true" disabled>
+                                    </div>
+                                    <div class="email-ctn-nock">
+                                        <p>checked MongoDB</p>
+                                    </div>
+                                </div>
+                                <div class="email-round-pro sm-res-ds-n lg-res-mg-bl">
+                                    <div class="email-signle-gp">
+                                        <input type="text" class="knob" value="0" data-rel="{{ percentages.3 }}" data-linecap="round" data-width="90" data-bgcolor="#E4E4E4" data-fgcolor="#00c292" data-thickness=".10" data-readonly="true" disabled>
+                                    </div>
+                                    <div class="email-ctn-nock">
+                                        <p>checked Cassandra</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                    <div class="recent-post-wrapper notika-shadow sm-res-mg-t-30 tb-res-ds-n dk-res-ds">
+                        <div class="recent-post-ctn">
+                            <div class="recent-post-title">
+                                <h2>Random leaks - {% for doc in random_leaks %}{{ doc }}{% endfor %}</h2>
+                            </div>
+                        </div>
+                        <div class="recent-post-items">
+                            {% for key, value_list  in random_leaks.items %}
+                                                {% for value in value_list %}
+                            <div class="recent-post-signle rct-pt-mg-wp">
+
+
+
+                            <div class="recent-post-signle">
+                                    <div class="recent-post-flex rct-pt-mg">
+
+                                        <div class="recent-post-it-ctn">
+                                            <h2>{% if value.url %}{{ value.url }}{% else %}{{ value.ip }}:{{ value.port }}{% endif %}</h2>
+                                        </div>
+                                    </div>
+                            </div>
+
+                            </div>
+                            {% endfor %}
+                                                                                {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                    <div class="recent-items-wp notika-shadow sm-res-mg-t-30">
+                        <div class="rc-it-ltd">
+                            <div class="recent-items-ctn">
+                                <div class="recent-items-title">
+                                    <h2>To check - {% for doc in for_later %}{{ doc }}{% endfor %}</h2>
+                                </div>
+                            </div>
+                            <div class="recent-items-inn">
+                                <table class="table table-inner table-vmiddle">
+                                    <thead>
+                                        <tr>
+                                            <th>Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+{% for key, value_list  in for_later.items %}
+                                                {% for value in value_list %}                                        <tr>
+                                            <td>{% if value.url %}{{ value.url }}{% else %}{{ value.ip }}:{{ value.port }}{% endif %}</td>
+                                        </tr>
+                                    {% endfor %}
+                                                                                {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Email Statistic area-->
+    <!-- Start Realtime sts area-->
+    <div class="realtime-statistic-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                    <div class="realtime-wrap notika-shadow mg-t-30">
+
+                                    <div class="recent-items-wp notika-shadow sm-res-mg-t-30">
+                        <div class="rc-it-ltd">
+                            <div class="recent-items-ctn">
+                                <div class="recent-items-title">
+                                    <h2>Notifications</h2>
+                                </div>
+                            </div>
+                            <div class="recent-items-inn">
+                                <table class="table table-inner table-vmiddle">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Keywords</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                                    {% for monitoring in monitor %}                      <tr>
+                                                                              <td>{{ monitoring.types }}           </td>
+                                        <td>{{ monitoring.keyword }}           </td>
+                                        </tr>
+
+                                    {% endfor %}
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <!-- End Realtime sts area-->
+    <!-- Start Footer area-->
+    <div class="footer-copyright-area">
+
+    </div>
+    <!-- End Footer area-->
+    <!-- jquery
+		============================================ -->
+    <script src="{% static 'js/vendor/jquery-1.12.4.min.js' %}"></script>
+    <!-- bootstrap JS
+		============================================ -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- wow JS
+		============================================ -->
+    <script src="{% static 'js/wow.min.js' %}"></script>
+    <!-- price-slider JS
+		============================================ -->
+    <script src="{% static 'js/jquery-price-slider.js' %}"></script>
+    <!-- owl.carousel JS
+		============================================ -->
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <!-- scrollUp JS
+		============================================ -->
+    <script src="{% static 'js/jquery.scrollUp.min.js' %}"></script>
+    <!-- meanmenu JS
+		============================================ -->
+    <script src="{% static 'js/meanmenu/jquery.meanmenu.js' %}"></script>
+    <!-- counterup JS
+		============================================ -->
+
+    <!-- mCustomScrollbar JS
+		============================================ -->
+    <script src="{% static 'js/scrollbar/jquery.mCustomScrollbar.concat.min.js' %}"></script>
+    <!-- jvectormap JS
+		============================================ -->
+
+    <!-- sparkline JS
+		============================================ -->
+    <script src="{% static 'js/sparkline/jquery.sparkline.min.js' %}"></script>
+    <script src="{% static 'js/sparkline/sparkline-active.js' %}"></script>
+    <!-- sparkline JS
+		============================================ -->
+
+    <!-- knob JS
+		============================================ -->
+    <script src="{% static 'js/knob/jquery.knob.js' %}"></script>
+    <script src="{% static 'js/knob/jquery.appear.js' %}"></script>
+    <script src="{% static 'js/knob/knob-active.js' %}"></script>
+    <!--  wave JS
+		============================================ -->
+
+    <!--  todo JS
+		============================================ -->
+    <!-- plugins JS
+		============================================ -->
+    <script src="{% static 'js/plugins.js' %}"></script>
+	<!--  Chat JS
+		============================================ -->
+
+    <!-- main JS
+		============================================ -->
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/charts/Chart.js' %}"></script>
+    <script src="{% static 'js/charts/bar-chart.js' %}"></script>
+    <script>drawCharts({{ labels|safe }}, {{ data|safe }});</script>
+	<!-- tawk chat JS
+		============================================ -->
+</body>
+
+</html>
+{% endblock %}

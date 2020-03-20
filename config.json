@@ -1,0 +1,12 @@
+{
+    "config": {
+        "BINARY_EDGE_KEY": "",
+        "monitoring": {
+            "gmail_email": "",
+            "gmail_password": ""
+        },
+        "blacklist": [
+
+        ]
+    }
+}
