@@ -32,7 +32,7 @@ n a new window fire up redis
 
 In a new window (in main directory) run 
 
-```celery worker celery worker -A leaklooker --loglevel=info```
+```celery worker -A leaklooker --loglevel=info```
 
 For scheduling task (monitoring) run also 
 
