@@ -3,6 +3,8 @@
 
 ### Discover, browse and monitor database/source code leaks
 
+Write-up https://medium.com/@woj_ciech/leaklooker-gui-discover-browse-and-monitor-database-source-code-leaks-f4b82bbb48fe
+
 # Requirements
 - python3
 - Binary Edge paid plan
@@ -43,6 +45,8 @@ I
 And server should be available on https://localhost:8000/
 
 # Guide
+
+Useful commands https://github.com/woj-ciech/LeakLooker-X/blob/master/cheatsheet.md
 
 ## Dashboard
 ![](https://i.imgur.com/IlVRBW1.jpg)
