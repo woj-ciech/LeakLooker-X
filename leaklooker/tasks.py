@@ -511,12 +511,12 @@ def check_rsync(c, i, search):
             banner = i['result']['data']['service']['banner'].split("\\n")
             for share in banner:
                 shares.append(share)
-
+            device = Rsync(search=search, ip=ip, port=port, shares=shares)
+            device.save()
         except Exception as e:
             print(e)
 
-    device = Rsync(search=search, ip=ip, port=port, shares=shares)
-    device.save()
+
 
     return_dict[c] = {"ip": ip, "port": port, "shares": shares}
 
@@ -675,14 +675,14 @@ def check_elastic(c, i, search):
                     indices_list.append(indice['index_name'])
 
             new_size = size(bytes_size)
-
+            device = Elastic(search=search, name=name, ip=ip, port=port, size=new_size, indices=indices_list)
+            device.save()
         except Exception as e:
             print(e)
 
     return_dict[c] = {"name": name, "ip": ip, "port": port, 'size': new_size, "indice": indices_list}
 
-    device = Elastic(search=search, name=name, ip=ip, port=port, size=new_size, indices=indices_list)
-    device.save()
+
     return return_dict
 
 
