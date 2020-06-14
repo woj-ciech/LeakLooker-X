@@ -3,7 +3,7 @@
 
 ### Discover, browse and monitor database/source code leaks
 
-Write-up https://medium.com/@woj_ciech/leaklooker-gui-discover-browse-and-monitor-database-source-code-leaks-f4b82bbb48fe
+Write-up https://www.offensiveosint.io/leaklooker-gui-discover-browse-and-monitor-database-source-code-leaks/
 
 # Requirements
 - python3
