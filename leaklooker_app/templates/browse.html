@@ -4,6 +4,7 @@
 {% load static %}
 {% block page_content %}
 {% load new_line %}
+{% load replace %}
 
 <head>
     <meta charset="utf-8">
@@ -65,8 +66,11 @@
     <!-- modernizr JS
 		============================================ -->
     <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
-</head>
 
+</head>
+<style>
+    td {word-wrap: break-word;}
+</style>
 <body>
     <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
@@ -132,11 +136,13 @@
 
                         </div>
 <div class="table-responsive">
-                            <table id="data-table-basic" class="table table-striped">
+                            <table id="data-table-basic" class="table table-striped" style="table-layout:fixed;">
                                 <thead>
-                                    <tr><th>Keyword</th>
+                                    <tr>
+                                        {% if type != "github" %}
+                                        <th>Keyword</th>
                                         <th>IP</th>
-                                        <th>Port</th>
+                                        {% endif %}
                                 {% if type == "elastic" %}
                                         <th>Cluster Name</th>
                                         <th>Size</th>
@@ -144,13 +150,20 @@
                                         {% elif type == "dirs" %}
                                                                                 <th>URL</th>
                                         <th>Directories</th>
+                                        {% elif type == "ftp" %}
+                                                                 <th>Link</th>
+                                        <th>Directories</th>
                                         {% elif type == "jenkins" %}
                                         <th>URL</th>
                                         <th>Jobs</th>
+                                        {% elif type == "keys" %}
+                                        <th>Title</th>
                                         {% elif type == "mongo" %}
                                                                                 <th>Size</th>
 
                                         <th>Databases</th>
+                                          {% elif type == "amazonbe" %}
+                                                                                <th>Buckets</th>
                                         {% elif type == "rethink" %}
                                         <th>Databases</th>
                                         {% elif type == "gitlab" %}
@@ -160,13 +173,23 @@
 
                                         {% elif type == "rsync" %}
                                                                                 <th>Shares</th>
+                                        {% elif type == "amazonbuckets" %}
+                                                                                <th>Bucket</th>
+                                        {% elif type == "github" %}
+                                                                                <th>Commit</th>
+                                         <th>Secret</th>
+                                         <th>Path</th>
                                         {% elif type == "kibana" %}
                                                                                 <th>Url</th>
 
                                         {% else %}
                                         {% endif %}
-                                                                                <th>Action</th>
-                                        <th>Created on</th>
+
+
+                                                                                <th>Created on</th>
+
+                                        <th>Action</th>
+
                                         <th>Additional</th>
                                     </tr>
 
@@ -174,59 +197,77 @@
                                     {% for git in all %}
 
                                     {% if git.confirmed %}
-                                                <tr id="{{ git.ip }}" style="background:#1caf9a">
+                                                <tr id="{{ git.ip }}{{ git.bucket }}{{ git.commit }}" style="background:#1caf9a">
                                                     {% elif git.for_later %}
-                                                    <tr id="{{ git.ip }}" style="background:#2196F3">
+                                                    <tr id="{{ git.ip }}{{ git.bucket }}{{ git.commit }}" style="background:#2196F3">
                                         {% else %}
-                                                                                            <tr id="{{ git.ip }}">
+                                                                                            <tr id="{{ git.ip }}{{ git.bucket }}{{ git.commit }}">
 
                                                 {% endif %}
+                                        {% if type != "github" %}
 
 
                                         <td> {{ git.search.keyword }} {{ git.search.country }} {{ git.search.network }}</td>
-                                        <td>{{ git.ip }}</td>
-                                                                                <td>{{ git.port }}</td>
+                                        <td style="word-wrap: break-word">
+                                            {% if git.port == 443 or git.port == 8443 %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
+                                {% endif %}
                                 {% if type == "elastic" %}
                                 <td>{{ git.name }}</td>
                                 <td>{{ git.size }}</td>
-                                <td>{{ git.indices|slice:"1:-1"|new_line|safe }}</td>
+                                <td style="word-wrap: break-word">{{ git.indices|slice:"1:-1"|new_line|safe }}</td>
+                                {% elif type == "github" %}
+                                <td style="word-wrap: break-word">{{ git.keyword }}/commit/{{ git.commit }}</td>
+                                <td style="word-wrap: break-word">{{ git.secret|slice:"1:-1"|new_line|safe }}</td>
+                                <td>{{ git.path|slice:"1:-1"|new_line|safe }}</td>
+                                <td> </td>
+
                                 {% elif type == "dirs" %}
                                                                 <td>{{ git.url }}</td>
 
-                                                                <td>{{ git.dirs|slice:"1:-1"|new_line|safe }}</td>
+                                                                <td style="word-wrap: break-word">{{ git.dirs|slice:"1:-1"|new_line|safe }}</td>
+                                {% elif type == "ftp" %}
+                                                                <td><a href="ftp://{{git.ip}}:{{git.port}}">ftp://{{git.ip}}:{{git.port}}</a></td>
+
+                                                                <td style="word-wrap: break-word"> {{ git.files|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "jenkins" %}
                                                                 <td>{{ git.url }}</td>
 
-                                                                <td>{{ git.jobs|slice:"1:-1"|new_line|safe }}</td>
+                                                                <td style="word-wrap: break-word">{{ git.jobs|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "gitlab" %}
                                                                 <td>{{ git.url }}</td>
                                 {% elif type == "mongo" %}
                                 <td>{{ git.size }}</td>
 
-                                                                <td>{{ git.databases|slice:"1:-1"|new_line|safe }}</td>
+                                                                <td style="word-wrap: break-word">{{ git.databases|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "rsync" %}
                                 <td>{{ git.shares }}</td>
+                                {% elif type == "amazonbe" %}
+                                <td style="word-wrap: break-word"><a href='https://{{ git.buckets|slice:"1:-1"|new_line|safe|replace }}'>https://{{ git.buckets|slice:"1:-1"|new_line|safe|replace }}</a> </td>
                                 {% elif type == "rethink" %}
-                                <td>{{ git.databases|slice:"1:-1"|new_line|safe }}</td>
+                                <td style="word-wrap: break-word">{{ git.databases|slice:"1:-1"|new_line|safe }}</td>
+                                {% elif type == "keys" %}
+                                <td>{{ git.title }}</td>
                                 {% elif type == "couchdb" %}
                                 <td>http://{{ git.ip }}:{{ git.port }}/_all_dbs</td>
                                 {% elif type == "kibana" %}
-                                <td>http://{{ git.ip }}:{{ git.port }}/app/kibana#/discover?_g=()</td>
+                                <td style="word-wrap: break-word">http://{{ git.ip }}:{{ git.port }}/app/kibana#/discover?_g=()</td>
                                 {% elif type == "cassandra" %}
-                                <td> {{ git.keyspaces|slice:"1:-1"|new_line|safe }}</td>
+                                <td style="word-wrap: break-word"> {{ git.keyspaces|slice:"1:-1"|new_line|safe }}</td>
+                                {% elif type == "amazonbuckets" %}
+                                <td style="word-wrap: break-word"> <a href='https://{{ git.bucket|slice:"1:-1"|new_line|safe|replace }}'>https://{{ git.bucket }}</a></td>
 
 
                                 {% endif %}
+                                                                        {% if type != "github" %}
 
-
-
-
-
-
-
-
-                                    <td><button value="{{ git.ip }}" class="btn btn-danger danger-icon-notika waves-effect"><i class="notika-icon notika-close"></i></button> <button value="{{ git.ip }}" class="btn btn-success success-icon-notika waves-effect"><i class="notika-icon notika-checked"></i></button> <button value="{{ git.ip }}" class="btn btn-primary primary-icon-notika waves-effect"><i class="notika-icon notika-refresh"></i></button></td>
                                 <td>{{ git.search.created_on }}</td>
+{% endif %}
+                                    <td><button value="{{ git.ip }}{{git.bucket}}{{git.commit}}" class="btn btn-danger danger-icon-notika waves-effect"><i class="notika-icon notika-close"></i></button> <button value="{{ git.ip }}{{git.bucket}}{{git.commit}}" class="btn btn-success success-icon-notika waves-effect"><i class="notika-icon notika-checked"></i></button> <button value="{{ git.ip }}{{git.bucket}}{{git.commit}}" class="btn btn-primary primary-icon-notika waves-effect"><i class="notika-icon notika-refresh"></i></button></td>
   {% if git.confirmed %}
                                                 <td>Confirmed</td>
                                                     {% elif git.for_later %}
@@ -246,7 +287,7 @@
                                         <th>Url</th>
                                         <th>IP</th>
                                         <th>Port</th>
-                                        <th>Action</th>
+                                        <th>Created on</th>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -338,6 +379,8 @@ let ip = $(this).attr('value');
 <script>
 $('.btn-success').click(function() {
 let ip = $(this).attr('value');
+var ipenc = encodeURI(ip)
+console.log(ipenc);
 <!--var ip = document.getElementsByClassName("btn btn-orange").getAttribute("value");-->
     $.ajax({
              url: "/{{ type }}/confirm/" + ip,
@@ -351,7 +394,7 @@ let ip = $(this).attr('value');
 
 <script>
 $('.btn-primary').click(function() {
-let ip = $(this).attr('value');
+let ip = encodeURI($(this).attr('value'));
 <!--var ip = document.getElementsByClassName("btn btn-teal").getAttribute("value");-->
     $.ajax({
              url: "/{{type }}/later/" + ip,

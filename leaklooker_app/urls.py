@@ -22,5 +22,9 @@ urlpatterns = [
     path('keyword/search', views.keyword_search_results, name='keyword_search_results'),
     path(r'^celery-progress/', include('celery_progress.urls')),
     path('get-task-info/', views.get_task_info, name="get_task_info"),
-
+    path('amazon_buckets/', views.amazonbuckets, name="amazonbuckets"),
+    # path('amazon_buckets/delete/', views.amazonbuckets, name="amazonbuckets"),
+    path('amazon_buckets/bruteforce', views.bruteforce_bucket, name="bruteforce_bucket"),
+    path('github/', views.github, name="github"),
+    path('github/github_repo', views.github_repo, name="github_repo"),
 ]

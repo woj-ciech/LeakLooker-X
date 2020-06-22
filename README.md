@@ -3,7 +3,14 @@
 
 ### Discover, browse and monitor database/source code leaks
 
-Write-up https://medium.com/@woj_ciech/leaklooker-gui-discover-browse-and-monitor-database-source-code-leaks-f4b82bbb48fe
+https://www.offensiveosint.io/offensive-osint-so1e07-offensive-leak-hunt-with-leaklooker
+
+https://www.offensiveosint.io/leaklooker-gui-discover-browse-and-monitor-database-source-code-leaks/
+
+![](https://www.offensiveosint.io/content/images/2020/06/LL-1.jpg)
+
+
+![](https://www.offensiveosint.io/content/images/2020/06/types.jpg)
 
 # Requirements
 - python3
@@ -105,6 +112,10 @@ It compares new results with database and blacklist and sends only new findings.
 
 ![](https://i.imgur.com/lzzat3a.jpg)
 
+## Screens
+![](https://www.offensiveosint.io/content/images/2020/06/peek1-1.gif)
+
+
 
 # Queries
 ```
@@ -118,7 +129,15 @@ It compares new results with database and blacklist and sends only new findings.
 'couchdb': "product:couchdb",
 "kibana": "product:kibana",
 "cassandra": "type:cassandra",
-"rethink": "type:rethinkdb"
+"rethink": "type:rethinkdb",
+"ftp":"ftp.user:anonymous",
+"asia":"tag:'webserver' s3.ap-southeast-1.amazonaws.com",
+"europe":"tag:'webserver' s3-eu-west-1.amazonaws.com",
+"north america":"tag:'webserver' s3-us-west-2.amazonaws.com",
+"api_key":'web.body.content:"api_key" -web.title:swagger',
+"stripe":'web.body.content:"STRIPE_KEY"',
+"secret_key":'web.body.content:"secret_key" -web.title:swagger',
+'google_api_key':'web.body.content:"google_api_key"'
 ```
 
 # Additional

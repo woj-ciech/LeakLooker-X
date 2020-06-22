@@ -1,16 +1,19 @@
 
 <!doctype html>
-<html class="no-js" lang="">
+<html class="no-js" lang="" xmlns:visibility="http://www.w3.org/1999/xhtml">
 {% load static %}
 {% block page_content %}
 
-{% load new_line %}
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>LeakLooker | Database </title>
+    <title>LeakLooker | Search {{ type }}</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+
+        <link rel="stylesheet" href="{% static 'css/wave/button.css' %}">
     <!-- favicon
 		============================================ -->
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
@@ -22,6 +25,11 @@
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <!-- Bootstrap CSS
 		============================================ -->
+
+    <!-- bootstrap select CSS
+		============================================ -->
+<!--        <link rel="stylesheet" href="{% static 'css/bootstrap-select/bootstrap-select.css' %}">-->
+
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
     <!-- owl.carousel CSS
 		============================================ -->
@@ -33,6 +41,10 @@
     <link rel="stylesheet" href="{% static 'css/meanmenu/meanmenu.min.css' %}">
     <!-- animate CSS
 		============================================ -->
+
+    <link rel="stylesheet" href="{% static 'css/dialog/sweetalert2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dialog/dialog.css' %}">
+
     <link rel="stylesheet" href="{% static 'css/animate.css' %}">
     <!-- normalize CSS
 		============================================ -->
@@ -40,8 +52,7 @@
     <!-- mCustomScrollbar CSS
 		============================================ -->
     <link rel="stylesheet" href="{% static 'css/scrollbar/jquery.mCustomScrollbar.min.css' %}">
-    <!-- jvectormap CSS
-		============================================ -->
+
     <!-- notika icon CSS
 		============================================ -->
     <link rel="stylesheet" href="{% static 'css/notika-custom-icon.css' %}">
@@ -56,17 +67,47 @@
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <!-- responsive CSS
 		============================================ -->
-
-
-        <link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
-
-        <link rel="stylesheet" href="{% static 'css/wave/button.css' %}">
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
     <!-- modernizr JS
 		============================================ -->
     <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
 </head>
+<style>
+    .progress-bar {
+	border-radius: $bar-radius;
+	overflow: hidden;
+  width: 100%;
 
+	span {
+		display: block;
+	}
+
+}
+
+
+.bar {
+  background: $bar-bg;
+}
+
+.progress {
+  animation: loader 8s ease infinite;
+  // Change the animation fill mode 'infinite' to 'forwards' to stop the animation from repeating.
+  background: $green;
+  color: #fff;
+  padding: $bar-size;
+  width: 0;
+}
+
+// Vertical Centering ==============================
+// You don't need this to make it work on your site.
+.progress-bar {
+  left: 50%;
+  max-width: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate3d(-50%,-50%,0);
+}
+</style>
 <body>
     <!--[if lt IE 8]>
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
@@ -99,7 +140,7 @@
                         </li>
                         <li><a data-toggle="tab" href="#search"><i class="notika-icon notika-search"></i> Search</a>
                         </li>
-                        <li class="active"><a href="{% url 'database' %}"><i class="notika-icon notika-edit"></i> Database</a>
+                        <li><a href="{% url 'database' %}"><i class="notika-icon notika-edit"></i> Database</a>
                         </li>
                         <li><a href="{% url 'notifications' %}"><i class="notika-icon notika-app"></i> Monitor</a>
                         </li>
@@ -119,11 +160,15 @@
 
 
 
+
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Main Menu area End-->
+	<!-- Breadcomb area Start-->
 
 	<!-- Breadcomb area End-->
     <div class="container">
@@ -131,77 +176,35 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="form-element-list">
                         <div class="row">
+                            <form id="gitlab_form">
 
+
+<div class="form-group">
+                                    <div class="nk-int-st">
+                                        <input type="text" class="form-control input-lg" placeholder="Repository URL" id="keyword">
+                                    </div>
+                                </div>
+                                <center><button id='submit' class="btn-lg btn-success notika-btn-success waves-effect">Search</button></center>
+                                <br>
+                                <center><p id="total">Total</p></center>
+                                            </form>
+     <div class="progress-bar wow" id="pgrbar"  style="width: 0%"> <span></span>
+                                                </div>
                         </div>
 <div class="table-responsive">
-                            <table id="data-table-basic" class="table table-striped">
+                            <table id="bsc-tbl-st" class="table table-striped" style="table-layout:fixed;">
                                 <thead>
                                     <tr>
-                                        <th>Keyword</th>
-                                        <th>Type</th>
-                                        <th>IP</th>
-                                        <th>Port</th>
-                                        <th>Info</th>
-                                <th>Action</th>
-                                        <th>Created on </th>
-                                        <th>Additional</th>
-                                    </tr>
+                                    <th>Commit</th>
+                                                                            <th>Secret</th>
+                                        <th>Path</th>
 
-                                </thead>
-                                    {% for i in results %}
-                                {% for git in i %}
-
-
-
-                                    {% if git.confirmed %}
-                                                <tr id="{{ git.ip }}" style="background:#1caf9a">
-                                                    {% elif git.for_later %}
-                                                    <tr id="{{ git.ip }}" style="background:#2196F3">
-                                        {% else %}
-                                                                                            <tr id="{{ git.ip }}">
-
-                                                {% endif %}
-
-                            <td> {{ git.search.network }} {{ git.search.country }} {{ git.search.keyword }}</td>
-                            <td id="type">{{ git.search.type }}</td>
-                                        <td>{{ git.ip }}</td>
-                                                                                <td>{{ git.port }}</td>
-                              <td>{{ git.databases|slice:"1:-1"|new_line|safe }}{{ git.indices|slice:"1:-1"|new_line|safe }}  {{ git.size}} {{ git.files|slice:"1:-1"|new_line|safe }} {{ git.keyspaces|slice:"1:-1"|new_line|safe }}{{ git.url }} {{ git.dirs|slice:"1:-1"|new_line|safe }}</td>
-
-
-
-
-
-
-
-
-                                    <td><button value="{{ git.ip }}" class="btn btn-danger danger-icon-notika waves-effect"><i class="notika-icon notika-close"></i></button> <button value="{{ git.ip }}" class="btn btn-success success-icon-notika waves-effect"><i class="notika-icon notika-checked"></i></button> <button value="{{ git.ip }}" class="btn btn-primary primary-icon-notika waves-effect"><i class="notika-icon notika-refresh"></i></button></td>
-                                <td>{{ git.search.created_on }} </td>
-
-  {% if git.confirmed %}
-                                                <td>Confirmed</td>
-                                                    {% elif git.for_later %}
-                                                    <td>For later</td>
-                                        {% else %}
-                                                                                           <td></td>
-
-                                                {% endif %}
+<!--                                    <th>Code</th>-->
 
                                     </tr>
-                                                                    {% endfor %}
-                                {% endfor %}
-
                                 </thead>
                                 <tbody>
                                 </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th>Url</th>
-                                        <th>IP</th>
-                                        <th>Port</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </tfoot>
                             </table>
 </div>
                     </div>
@@ -215,6 +218,8 @@
     <!-- jquery
 
 		============================================ -->
+
+
 
 
 <script src="{% static 'js/vendor/jquery-1.12.4.min.js' %}"></script>
@@ -258,7 +263,6 @@
     <script src="{% static 'js/knob/jquery.knob.js' %}"></script>
     <script src="{% static 'js/knob/jquery.appear.js' %}"></script>
     <script src="{% static 'js/knob/knob-active.js' %}"></script>
-
 	<!--  wave JS
 		============================================ -->
     <script src="{% static 'js/wave/waves.min.js' %}"></script>
@@ -266,7 +270,12 @@
     <!-- plugins JS
 		============================================ -->
     <script src="{% static 'js/plugins.js' %}"></script>
+    <!-- bootstrap select JS
+		============================================ -->
+<!--        <script src="{% static 'js/bootstrap-select/bootstrap-select.js' %}"></script>-->
+
     <!-- Data Table JS
+
 		============================================ -->
     <script src="{% static 'js/data-table/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'js/data-table/data-table-act.js' %}"></script>
@@ -274,54 +283,108 @@
 		============================================ -->
     <script src="{% static 'js/main.js' %}"></script>
 
+     <script src="{% static 'js/dialog/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'js/dialog/dialog-active.js' %}"></script>
+
+
 
 <script>
-$('.btn-danger').click(function() {
-let ip = $(this).attr('value');
-var type_id = document.getElementById("type");
-type = type_id.textContent
-<!--var ip = document.getElementsByClassName("btn btn-cyan").getAttribute("value");-->
-    $.ajax({
-             url: "/"+type+"/delete/" + ip,
+    $('#submit').click(function(event){
+    $("#bsc-tbl-st td").remove();
+    document.getElementById("total").innerHTML = "Total";
+        pgrbar = document.getElementById("pgrbar");
+        pgrbar.style['width'] = '0%';
+        pgrbar.textContent = "";
+        keyword = $('input[id=keyword]').val();
+         event.preventDefault(); //so that we stop normal form submit.
+        dataString = 'keyword=' + keyword;
+         $.ajax({
+             url: "/github/github_repo",
              type: 'GET',
+             dataType: 'json',
+             data: dataString,
              success:  function(response) {
-                    var row = document.getElementById(ip);
-                    row.parentNode.removeChild(row);
-                }
-})});
+                     get_task_info(response.task_id);
+}
+}
+)
+}
+)
 </script>
-
+         <script src="{% static 'js/celery_progress.js' %}"></script>
 <script>
-$('.btn-success').click(function() {
-let ip = $(this).attr('value');
-var type_id = document.getElementById("type");
-type = type_id.textContent
-<!--var ip = document.getElementsByClassName("btn btn-teal").getAttribute("value");-->
+
+
+    var help = [];
+
+ function get_task_info(task_id) {
+    pgrbar = document.getElementById("pgrbar");
+
+    var type = window.location.pathname.split('/');
+    var empty = 0;
     $.ajax({
-             url: "/"+type+"/confirm/" + ip,
-             type: 'GET',
-             success:  function(response) {
-                document.getElementById(ip).style['background'] = '#1caf9a';
+            type: 'get',
+            url: '/get-task-info/',
+            cache: false,
+            data: {
+                'task_id': task_id
+            },
+            success: function(data) {
+                if (data.state == 'PENDING') {
+                    pgrbar.style['visibility'] = "visible";
 
                 }
-})});
-</script>
+                if (data.state == 'STARTED') {
+                    document.getElementById("total").innerHTML = "Cloning...";
 
-<script>
-$('.btn-primary').click(function() {
-let ip = $(this).attr('value');
-var type_id = document.getElementById("type");
-type = type_id.textContent
-<!--var ip = document.getElementsByClassName("btn btn-teal").getAttribute("value");-->
-    $.ajax({
-             url: "/"+type+"/later/" + ip,
-             type: 'GET',
-             success:  function(response) {
-                document.getElementById(ip).style['background'] = '#2196F3';
+                } else if (data.state == 'PROGRESS') {
+
+                    document.getElementById("total").innerHTML = data.result.commit;
+
+                    pgrbar.style['width'] = data.result.percent + "%";
+                    pgrbar.style['visibility'] = "visible";
+                    pgrbar.textContent = data.result.percent + "%";
+
+                    if (help.indexOf(data.result['results']) == -1) {
+
+<!--                    $('#bsc-tbl-st tbody').append("<tr><td>" + data.result['results'] + "</td><td>" + data.result['secret'] + "</td><td>");-->
+                    }
+                    help.push(data.result['results']);
+
+
                 }
-})});
-</script>
 
+                    else if (data.state == 'SUCCESS') {
+                    pgrbar.style['visibility'] = "hidden";
+                                        document.getElementById("total").innerHTML = "";
+
+                                        $('#bsc-tbl-st tbody').html("");
+                    Object.keys(data.result.results).forEach(function(key) {
+                    var secs = data.result.results[key].toString();
+                    $('#bsc-tbl-st tbody').append('<tr><td style="word-wrap: break-word">' + keyword +"/commit/"+ key + '</td><td style="word-wrap: break-word">' +
+                    data.result.results[key]['secret'].toString().replace(/,/g, "<br> <br>") + "</td><td>" +
+                    data.result.results[key]['path'].toString().replace(/,/g, "<br> <br>")  + "</td>" );
+                            });
+                            }
+
+
+
+                    if (data.state != 'SUCCESS') {
+                        setTimeout(function() {
+                            get_task_info(task_id)
+                        }, 100);
+
+
+
+
+                    }
+                },
+                error: function(data) {
+
+                 }
+            })
+    };
+</script>
 </body>
 
 </html>

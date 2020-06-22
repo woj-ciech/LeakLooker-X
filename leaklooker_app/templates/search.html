@@ -25,6 +25,11 @@
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <!-- Bootstrap CSS
 		============================================ -->
+
+    <!-- bootstrap select CSS
+		============================================ -->
+        <link rel="stylesheet" href="{% static 'css/bootstrap-select/bootstrap-select.css' %}">
+
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
     <!-- owl.carousel CSS
 		============================================ -->
@@ -171,6 +176,87 @@
                     <div class="form-element-list">
                         <div class="row">
                             <form id="gitlab_form">
+                                {% if type == "amazonbe" %}
+
+<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                <div class="form-group">
+                                    <div class="nk-int-st">
+                                   <div class="bootstrap-select fm-cmp-mg">
+                                    <select class="selectpicker" id="s3select">
+											<option>Europe</option>
+											<option>North America</option>
+											<option>Asia</option>
+
+										</select>
+                                </div>
+                                    </div>
+                                </div>
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                <div class="form-group">
+                                    <div class="nk-int-st">
+                                        <input class="form-control" id='keyword' placeholder="Keyword" type="text">
+                                    </div>
+                                </div>
+                            </div>
+
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                <div class="form-group">
+                                    <div class="nk-int-st">
+                                        <input class="form-control" id='network' placeholder="Network" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                <div class="form-group">
+                                    <div class="nk-int-st">
+                                        <input class="form-control" id='page' placeholder="Page" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                                {% elif type == "keys" %}
+
+<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                <div class="form-group">
+                                    <div class="nk-int-st">
+                                   <div class="bootstrap-select fm-cmp-mg">
+                                    <select class="selectpicker" id="s3select">
+											<option>api_key</option>
+											<option>secret_key</option>
+											<option>Stripe</option>
+                                        <option>google_api_key</option>
+
+
+										</select>
+                                </div>
+                                    </div>
+                                </div>
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                <div class="form-group">
+                                    <div class="nk-int-st">
+                                        <input class="form-control" id='keyword' placeholder="Keyword" type="text">
+                                    </div>
+                                </div>
+                            </div>
+
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                <div class="form-group">
+                                    <div class="nk-int-st">
+                                        <input class="form-control" id='network' placeholder="Network" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                                <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                <div class="form-group">
+                                    <div class="nk-int-st">
+                                        <input class="form-control" id='page' placeholder="Page" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                                {% else %}
                             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                 <div class="form-group">
                                     <div class="nk-int-st">
@@ -178,6 +264,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                 <div class="form-group">
                                     <div class="nk-int-st">
@@ -199,7 +286,7 @@
                                     </div>
                                 </div>
                             </div>
-
+      {% endif %}
                         <center><button id='submit' class="btn-lg btn-success notika-btn-success waves-effect">Search</button></center>
                                 <br>
                                 <center><p id="total">Total</p></center>
@@ -221,9 +308,18 @@
                                                                                 <th>URL</th>
 
                                         <th>Directories</th>
+                                        {% elif type == "ftp" %}
+                                        <th>Directories</th>
                                         {% elif type == "jenkins" %}
                                         <th>URL</th>
                                         <th>Jobs</th>
+                                        {% elif type == "amazonbuckets" %}
+                                        <th>Keyword</th>
+                                        <th>Bucket</th>
+                                        {% elif type == "amazonbe" %}
+                                        <th>Buckets</th>
+                                        {% elif type == "keys" %}
+                                        <th>Title</th>
                                         {% elif type == "gitlab" %}
                                         <th>URL</th>
                                         {% elif type == "mongo" %}
@@ -307,7 +403,12 @@
     <!-- plugins JS
 		============================================ -->
     <script src="{% static 'js/plugins.js' %}"></script>
+    <!-- bootstrap select JS
+		============================================ -->
+        <script src="{% static 'js/bootstrap-select/bootstrap-select.js' %}"></script>
+
     <!-- Data Table JS
+
 		============================================ -->
     <script src="{% static 'js/data-table/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'js/data-table/data-table-act.js' %}"></script>
@@ -328,12 +429,21 @@
         pgrbar.style['width'] = '0%';
         pgrbar.textContent = "";
          event.preventDefault(); //so that we stop normal form submit.
+         {% if type == 'amazonbe' or type == "keys" %}
+         var type1 = document.getElementById("s3select").value.toLowerCase();
+<!--         var keyword = "";-->
+         var country = "";
+         {% else %}
          var type = window.location.pathname.split('/');
-         dataString = 'country=' + $('input[id=country]').val() +
+         type1 = type[2];
+<!--         var keyword = $('input[id=keyword]').val();-->
+         var country = $('input[id=country]').val();
+         {% endif %}
+         dataString = 'country=' + country +
                      '&keyword=' + $('input[id=keyword]').val() + '&network=' + $('input[id=network]').val() +
                      '&page=' + $('input[id=page]').val()
          $.ajax({
-             url: "/search/" + type[2] + "/search_results",
+             url: "/search/" + type1 + "/search_results",
              type: 'GET',
              dataType: 'json',
              data: dataString,
@@ -373,7 +483,6 @@ function get_task_info(task_id) {
 
                 } else if (data.state == 'SUCCESS') {
                     pgrbar.style['visibility'] = "hidden";
-
                     document.getElementById("total").innerHTML = "<h1>" + data.result.events + "</h1>" + Math.round(data.result.events / 20) + " pages";
 
                     for (var key in data.result.results) {
@@ -386,11 +495,17 @@ function get_task_info(task_id) {
 
                         try
                          {
-                            if (type[2] == "gitlab") {
+                            console.log(data.result.type);
+                            if (data.result.type == "gitlab") {
 
-                                $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['url'] + "</td><td>");
-                            } if (type[2] == "dirs") {
-    if (Array.isArray(data.result.results[key][key]['dirs'])) {
+                                $('#bsc-tbl-st tbody').append("<tr><td>" + data.result[key][key]['ip'] + "</td><td>" + data.result[key][key]['port'] + "</td><td>" + data.result[key][key]['url'] + "</td><td>");
+                            }
+                            if (data.result.type == "keys") {
+
+                                $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['title'] + "</td><td>");
+                            }
+                            if (data.result.type == "dirs") {
+                               if (Array.isArray(data.result.results[key][key]['dirs'])) {
         for (var i = 0; i < data.result.results[key][key]['dirs'].length; i++) {
             text += data.result.results[key][key]['dirs'][i] + "<br>";
         }}
@@ -401,41 +516,64 @@ function get_task_info(task_id) {
 
          }
 
-                           if (type[2] == "jenkins"){
+                           if (data.result.type == "jenkins"){
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['url'] + "</td><td>" + data.result.results[key][key]['jobs'] + "</td><td>");
                 }
-                if (type[2] == "mongo"){
+                if (data.result.type === "europe" || data.result.type === "asia" || data.result.type === "north america") {
+                console.log("aaaaaaaaaaaaaaaa jebane");
+              $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>"+ data.result.results[key][key]['buckets'].toString().replace(",","<br>") + "</td><td>");
+                }
+                if (data.result.type == "mongo"){
                 var text = "";
         for (var i = 0; i < data.result.results[key][key]['databases'].length; i++) {
             text += data.result.results[key][key]['databases'][i] + "<br>";
         }
                 $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['size'] + "</td><td>" + text + "</td><td>");
                 }
-                if (type[2] == "rsync"){
+                if (data.result.type == "rsync"){
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['shares'] + "</td><td>");
                 }
-                if (type[2] == "sonarqube"){
+                if (data.result.type == "sonarqube"){
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['url'] + "</td><td>");
             }
-            if (type[2] == "couchdb" || type[2] == "kibana"){
+            if (type1 == "couchdb" || type1 == "kibana"){
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>");
             }
-            if (type[2] == "cassandra"){
+
+            if (data.result.type == "cassandra"){
             var text = "";
         for (var i = 0; i < data.result.results[key][key]['keyspaces'].length; i++) {
             text += data.result.results[key][key]['keyspaces'][i] + "<br>";
         }
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + text + "</td><td>");
             }
-            if (type[2] == "rethink"){
+            if (data.result.type == "rethink"){
             var text = "";
         for (var i = 0; i < data.result.results[key][key]['databases'].length; i++) {
             text += data.result.results[key][key]['databases'][i] + "<br>";
         }
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + text + "</td><td>");
             }
+            if (data.result.type == "ftp") {
 
-                           if (type[2] == "elastic") {
+
+        var text = "";
+        for (var i = 0; i < data.result.results[key][key]['files'].length; i++) {
+            text += data.result.results[key][key]['files'][i] + "<br>";
+        }
+
+
+
+
+
+         $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + text + "</td><td>");
+
+
+                            }
+
+
+
+                           if (data.result.type == "elastic") {
 
 
         var text = "";
@@ -443,11 +581,17 @@ function get_task_info(task_id) {
             text += data.result.results[key][key]['indice'][i] + "<br>";
         }
 
+
+
+
+
          $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['name'] + "</td><td>" + data.result.results[key][key]['size'] + "</td><td>" + text + "</td><td>");
 
 
                             }
                             }
+
+
 
                         catch (err) {
 

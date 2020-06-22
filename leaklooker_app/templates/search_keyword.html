@@ -205,6 +205,8 @@ padding: 5px;
                         </div>
                 <div class="results">
                         <p id="gitlab"></p>
+                                                    <p id="ftp"></p>
+
                                 <p id="jenkins"></p>
                             <p id="elastic"></p>
                                 <p id="couchdb"></p>
@@ -355,6 +357,10 @@ padding: 5px;
         {
           label: "Rsync",
           value: "rsync"
+        },
+        {
+          label: "Ftp",
+          value: "ftp"
         },
                 {
           label: "Cassandra",
@@ -592,6 +598,9 @@ function get_task_info(task_id) {
                 }
                 if (data.result.type == "rsync"){
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.type + "</td><td>"   + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['shares'] + "</td><td>");
+                }
+                if (data.result.type == "ftp"){
+              $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.type + "</td><td>"   + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['files'] + "</td><td>");
                 }
                 if (data.result.type == "sonarqube"){
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.type + "</td><td>"   + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['url'] + "</td><td>");

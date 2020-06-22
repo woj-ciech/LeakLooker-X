@@ -19,6 +19,15 @@ class Gitlab(models.Model):
     confirmed = models.BooleanField(default=False)
     for_later = models.BooleanField(default=False)
 
+class Ftp(models.Model):
+    search = models.ForeignKey(Search, on_delete=models.CASCADE)
+    ip = models.CharField(max_length=100)
+    url = models.CharField(max_length=100)
+    port = models.CharField(max_length=100)
+    confirmed = models.BooleanField(default=False)
+    for_later = models.BooleanField(default=False)
+    files = models.CharField(max_length=10000)
+
 class Elastic(models.Model):
     search = models.ForeignKey(Search, on_delete=models.CASCADE)
     ip = models.CharField(max_length=100)
@@ -28,6 +37,35 @@ class Elastic(models.Model):
     for_later = models.BooleanField(default=False)
     indices =models.CharField(max_length=10000)
     size = models.CharField(max_length=100)
+
+class Keys(models.Model):
+    search = models.ForeignKey(Search, on_delete=models.CASCADE)
+    ip = models.CharField(max_length=100)
+    port = models.CharField(max_length=100)
+    confirmed = models.BooleanField(default=False)
+    for_later = models.BooleanField(default=False)
+    title = models.CharField(max_length=1000, null=True)
+
+class Amazonbe(models.Model):
+    search = models.ForeignKey(Search, on_delete=models.CASCADE)
+    ip = models.CharField(max_length=100)
+    port = models.CharField(max_length=100)
+    confirmed = models.BooleanField(default=False)
+    for_later = models.BooleanField(default=False)
+    buckets = models.CharField(max_length=10000)
+
+class AmazonBuckets(models.Model):
+    bucket = models.CharField(max_length=1000)
+    confirmed = models.BooleanField(default=False)
+    for_later = models.BooleanField(default=False)
+
+class Github(models.Model):
+    commit = models.CharField(max_length=1000)
+    path = models.CharField(max_length=1000)
+    secret = models.CharField(max_length=10000)
+    confirmed = models.BooleanField(default=False)
+    for_later = models.BooleanField(default=False)
+    keyword = models.CharField(max_length=10000)
 
 class Dirs(models.Model):
     search = models.ForeignKey(Search, on_delete=models.CASCADE)

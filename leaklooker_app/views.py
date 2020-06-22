@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from leaklooker_app import forms
-from leaklooker_app.models import Search, Gitlab, Elastic, Rethink, Mongo, Cassandra, Monitor
+from leaklooker_app.models import Search, Gitlab, Elastic, Rethink, Mongo, Cassandra, Monitor, Ftp, AmazonBuckets, Github
 from leaklooker import tasks
 from leaklooker.tasks import check_main
 from django.apps import apps
@@ -12,7 +12,7 @@ import random
 from celery.result import AsyncResult
 
 
-types = ["gitlab","elastic","dirs","jenkins","mongo","rsync",'sonarqube','couchdb',"kibana","cassandra","rethink"]
+types = ["gitlab","elastic","dirs","jenkins","mongo","rsync",'sonarqube','couchdb',"kibana","cassandra","rethink", "ftp"]
 
 def index(request):
 
@@ -143,11 +143,11 @@ def search_results(request,type):
         search = Search(type=type, keyword=keyword, country=country, network=network)
         search.save()
 
-        gitlab_search_task = check_main.delay(fk=search.id, page=page, keyword=keyword, country=country,
+        gitlab_search_task = tasks.check_main.delay(fk=search.id, page=page, keyword=keyword, country=country,
                                               network=network, type=type)
 
         request.session['task_id'] = gitlab_search_task.task_id
-
+        print('test')
         # return render(request, 'search.html', context={'task_id': gitlab_search_task.task_id, 'type':type})
         return HttpResponse(json.dumps({'task_id': gitlab_search_task.task_id}), content_type='application/json')
             # return HttpResponse(json.dumps(gitlab_search_task), content_type='application/json')
@@ -157,17 +157,23 @@ def search_results(request,type):
 
 def get_task_info(request):
     task_id = request.GET.get('task_id', None)
+    data = {}
     if task_id is not None:
         task = AsyncResult(task_id)
+        print(task.result)
         if task.state == "PROGRESS":
             try:
                 data = {
                     'state': task.state,
                     'result': task.result,
-                    'percentage': task.result['current'] / task.result['total'] * 100
+                    'percentage': task.result['current'] / task.result['total'] * 100,
                 }
-            except:
-                pass
+            except Exception as e:
+                data = {
+                    'state': task.state,
+                    'result': task.result,
+                }
+
         else:
             data = {
                 'state': task.state,
@@ -244,42 +250,110 @@ def stats_db(request,type):
 
 def delete(request,ip, type):
     if request.is_ajax() and request.method == 'GET':
-        model = apps.get_model('leaklooker_app', type)
-        all = model.objects.get(ip=ip)
+        if type=='amazonbuckets':
+            amazon = AmazonBuckets.objects.get(bucket=ip)
+            amazon.delete()
+        elif type == 'github':
+            gitt = Github.objects.get(commit=ip)
+            gitt.delete()
+        else:
 
-        with open("config.json","r+") as config:
-            config_dict = json.load(config)
-            config_dict['config']['blacklist'].append(ip)
-            config.seek(0)  # <--- should reset file position to the beginning.
-            json.dump(config_dict, config, indent=4)
-            config.truncate()
 
-        all.delete()
+
+            
+            model = apps.get_model('leaklooker_app', type)
+            all = model.objects.get(ip=ip)
+
+            with open("config.json","r+") as config:
+                config_dict = json.load(config)
+                config_dict['config']['blacklist'].append(ip)
+                config.seek(0)  # <--- should reset file position to the beginning.
+                json.dump(config_dict, config, indent=4)
+                config.truncate()
+
+            all.delete()
 
         return HttpResponse(json.dumps({"Results": "OK"}), content_type='application/json')
 
 def confirm(request,ip, type):
     if request.is_ajax() and request.method == 'GET':
-        model = apps.get_model('leaklooker_app', type)
-        all = model.objects.get(ip=ip)
-        all.confirmed = True
-        all.for_later = False
+        if type=='amazonbuckets':
+            amazon = AmazonBuckets.objects.get(bucket=ip)
+            amazon.confirmed = True
+            amazon.for_later = False
 
-        all.save()
+            amazon.save()
+        elif type == 'github':
+            gitt = Github.objects.get(commit=ip)
+            gitt.confirmed = True
+            gitt.for_later = False
+
+            gitt.save()
+        else:
+            model = apps.get_model('leaklooker_app', type)
+            all = model.objects.get(ip=ip)
+            all.confirmed = True
+            all.for_later = False
+
+            all.save()
 
         return HttpResponse(json.dumps({"Results": "OK"}), content_type='application/json')
 
 def for_later(request,ip,type):
     if request.is_ajax() and request.method == 'GET':
-        model = apps.get_model('leaklooker_app', type)
-        all = model.objects.get(ip=ip)
+        if type=='amazonbuckets':
+            amazon = AmazonBuckets.objects.get(bucket=ip)
+            amazon.for_later = True
+            amazon.confirmed = False
 
-        all.for_later = True
-        all.confirmed = False
+            amazon.save()
+        elif type == 'github':
+            gitt = Github.objects.get(commit=ip)
+            gitt.confirmed = False
+            gitt.for_later = True
 
-        all.save()
+            gitt.save()
+        else:
+            model = apps.get_model('leaklooker_app', type)
+            all = model.objects.get(ip=ip)
+
+            all.for_later = True
+            all.confirmed = False
+
+            all.save()
 
         return HttpResponse(json.dumps({"Results": "OK"}), content_type='application/json')
 
 def elastic_search(request):
     return render(request, 'search.html', {})
+
+
+def amazonbuckets(request):
+    return render(request, "amazon.html",{})
+
+def bruteforce_bucket(request):
+    if request.is_ajax() and request.method == "GET":
+        keyword = request.GET['keyword']
+
+        gitlab_search_task = tasks.brute_buckets.delay(keyword=keyword)
+
+        request.session['task_id'] = gitlab_search_task.task_id
+        return HttpResponse(json.dumps({'task_id': gitlab_search_task.task_id}), content_type='application/json')
+        # return HttpResponse(json.dumps(gitlab_search_task), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps({'OK2': 'OK'}), content_type='application/json')
+
+def github(request):
+    return render(request, "github.html",{})
+
+def github_repo(request):
+    if request.is_ajax() and request.method == "GET":
+        keyword = request.GET['keyword']
+        print(keyword)
+        gitlab_search_task = tasks.github_repo_search.delay(keyword=keyword)
+
+        request.session['task_id'] = gitlab_search_task.task_id
+        return HttpResponse(json.dumps({'task_id': gitlab_search_task.task_id}), content_type='application/json')
+        # return HttpResponse(json.dumps(gitlab_search_task), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps({'OK2': 'OK'}), content_type='application/json')
