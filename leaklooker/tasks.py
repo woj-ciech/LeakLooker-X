@@ -16,15 +16,15 @@ import ast
 import email.message
 import math
 import re
-import datetime
-from celery import group
+
 import hashlib
-import time
 from urllib.parse import urlparse
+import jxmlease
+
 
 
 from leaklooker_app.models import Monitor, Search, Rethink, Cassandra, Gitlab, Elastic, Dirs, Jenkins, Mongo, Rsync, \
-    Sonarqube, Couchdb, Kibana, Ftp, Amazonbe, AmazonBuckets, Keys, Github
+    Sonarqube, Couchdb, Kibana, Ftp, Amazonbe, AmazonBuckets, Keys, Github, Amazons3be
 
 app = celery.Celery('leaklooker', broker="redis://localhost:6379")
 
@@ -34,9 +34,7 @@ def get_config():
 
     return config_dict
 
-config = get_config()
 
-headers = {'X-Key': config['config']['BINARY_EDGE_KEY']}
 
 queries = {"gitlab": "title:%22gitlab%22%20AND%20web.body.content:%22register%22",
            "elastic": "type:%22elasticsearch%22",
@@ -56,7 +54,8 @@ queries = {"gitlab": "title:%22gitlab%22%20AND%20web.body.content:%22register%22
            "api_key":'web.body.content:"api_key" -web.title:swagger',
            "stripe":'web.body.content:"STRIPE_KEY"',
            "secret_key":'web.body.content:"secret_key" -web.title:swagger',
-           'google_api_key':'web.body.content:"google_api_key"'}
+           'google_api_key':'web.body.content:"google_api_key"',
+           'amazons3be':"web.body.content:ListBucketResult"}
 
 buckets_all = ["s3.ap-southeast-1.amazonaws.com","s3.ap-southeast-2.amazonaws.com","s3-eu-west-1.amazonaws.com","s3-eu-west-2.amazonaws.com","s3-us-west-2.amazonaws.com","s3-us-west-1.amazonaws.com"]
 keys_all = ['api_key','stripe','secret_key','google_api_key']
@@ -70,6 +69,9 @@ with open ("buckets.txt","r") as f:
 
 def check_credits():
     credits = 0
+    config = get_config()
+
+    headers = {'X-Key': config['config']['BINARY_EDGE_KEY']}
     try:
         req = requests.get("https://api.binaryedge.io/v2/user/subscription", headers=headers)
         req_json = json.loads(req.content)
@@ -82,6 +84,9 @@ def check_credits():
 
 def stats(type=None):
     count = 0
+    config = get_config()
+
+    headers = {'X-Key': config['config']['BINARY_EDGE_KEY']}
     if type:
         query = queries[type]
         end = 'https://api.binaryedge.io/v2/query/search/stats?query=' + query + "&type=ports"
@@ -95,6 +100,9 @@ def stats(type=None):
 
 @shared_task(bind=True)
 def check_main(self, fk, keyword=None, country=None, network=None, page=None, type=None):
+    config = get_config()
+
+    headers = {'X-Key': config['config']['BINARY_EDGE_KEY']}
     search = Search.objects.get(id=fk)
     progress_recorder = ProgressRecorder(self)
     results = {}
@@ -103,6 +111,9 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if keyword:
         query = "%20" + keyword + "%20"
+
+    if " " in keyword:
+        keyword = keyword.split(" ")[0]
 
     if country:
         query = query + "country:" + country + "%20"
@@ -123,18 +134,19 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     events = req_json['total']
     if type.lower() == "gitlab":
-        results['type'] = "gitlab"
         for c, i in enumerate(req_json['events']):
-            results_gitlab = check_gitlab(c, i, search)
+            results_gitlab = check_gitlab(c, i, search, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_gitlab
 
         self.update_state(state="SUCCESS",
-                          meta={"type": type.lower(), "total": total, 'events': events, 'results': results})
+                          meta={"type": 'gitlab', "total": total, 'events': events, 'results': results})
+        raise Ignore()
+
 
     if type.lower() == "elastic":
         for c, i in enumerate(req_json['events']):
-            results_elastic = check_elastic(c, i, search)
+            results_elastic = check_elastic(c, i, search,keyword=keyword, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_elastic
 
@@ -143,9 +155,20 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
         raise Ignore()
 
+    if type.lower() == "amazons3be":
+        for c, i in enumerate(req_json['events']):
+            results_amazons3be = check_amazons3be(c, i, search,keyword=keyword, config=config)
+            progress_recorder.set_progress(c + 1, total=total)
+            results[c] = results_amazons3be
+
+        self.update_state(state="SUCCESS",
+                          meta={"type": type.lower(), "total": total, 'events': events, 'results': results})
+
+        raise Ignore()
+
     if type.lower() == 'asia' or type.lower() == "europe" or type.lower() == "north america":
         for c,i in enumerate(req_json['events']):
-            results_amazonbe = check_amazonbe(c,i,search)
+            results_amazonbe = check_amazonbe(c,i,search, config=config)
             progress_recorder.set_progress(c+1,total=total)
             results[c] = results_amazonbe
 
@@ -155,7 +178,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() in keys_all:
         for c,i in enumerate(req_json['events']):
-            results_keys = check_keys(c,i,search)
+            results_keys = check_keys(c,i,search, config=config)
             progress_recorder.set_progress(c+1,total=total)
             results[c] = results_keys
 
@@ -165,7 +188,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "dirs":
         for c, i in enumerate(req_json['events']):
-            results_dirs = check_dir(c, i, search)
+            results_dirs = check_dir(c, i, search,keyword=keyword, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_dirs
 
@@ -175,7 +198,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "jenkins":
         for c, i in enumerate(req_json['events']):
-            results_jenkins = check_jenkins(c, i, search)
+            results_jenkins = check_jenkins(c, i, search, keyword=keyword, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_jenkins
 
@@ -185,7 +208,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "mongo":
         for c, i in enumerate(req_json['events']):
-            results_mongo = check_mongo(c, i, search)
+            results_mongo = check_mongo(c, i, search, keyword=keyword, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_mongo
 
@@ -194,7 +217,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
         raise Ignore()
     if type.lower() == "rsync":
         for c, i in enumerate(req_json['events']):
-            results_rsync = check_rsync(c, i, search)
+            results_rsync = check_rsync(c, i, search, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_rsync
 
@@ -204,7 +227,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "ftp":
         for c, i in enumerate(req_json['events']):
-            results_ftp = check_ftp(c, i, search, keyword=keyword)
+            results_ftp = check_ftp(c, i, search, keyword=keyword, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_ftp
 
@@ -215,7 +238,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "sonarqube":
         for c, i in enumerate(req_json['events']):
-            results_sonarqube = check_sonarqube(c, i, search)
+            results_sonarqube = check_sonarqube(c, i, search, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_sonarqube
 
@@ -225,7 +248,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "couchdb":
         for c, i in enumerate(req_json['events']):
-            results_couchdb = check_couchdb(c, i, search)
+            results_couchdb = check_couchdb(c, i, search, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_couchdb
 
@@ -235,7 +258,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "kibana":
         for c, i in enumerate(req_json['events']):
-            results_kibana = check_kibana(c, i, search)
+            results_kibana = check_kibana(c, i, search, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_kibana
 
@@ -245,7 +268,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "cassandra":
         for c, i in enumerate(req_json['events']):
-            results_cassandra = check_cassandra(c, i, search)
+            results_cassandra = check_cassandra(c, i, search, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_cassandra
 
@@ -255,7 +278,7 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
 
     if type.lower() == "rethink":
         for c, i in enumerate(req_json['events']):
-            results_rethink = check_rethink(c, i, search)
+            results_rethink = check_rethink(c, i, search, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_rethink
 
@@ -459,8 +482,42 @@ def send_mail(results):
         print('Something went wrong...')
     pass
 
+def check_amazons3be(c,i,search,keyword, config):
+    return_dict = {}
+    myparser = jxmlease.Parser()
 
-def check_rethink(c, i, search):
+    ip = i['target']['ip']
+    port = i['target']['port']
+    files = []
+    indicators = []
+
+    if Amazons3be.objects.filter(ip=ip).exists() or ip in config['config']['blacklist']:
+        pass
+    else:
+        try:
+            root = myparser(i['result']['data']['response']['body']['content'])
+            if 'Contents' in root['ListBucketResult']:
+                for counter, i in enumerate(root['ListBucketResult']['Contents']):
+
+                    if keyword in str(i['Key'].lower()):
+                        indicators.append(str(i['Key']))
+                    if counter < 50:
+                        files.append(str(i['Key']))
+
+                device = Amazons3be(search=search, ip=ip, port=port, files=files, indicator=indicators)
+                device.save()
+
+                return_dict[c] = {"ip": ip, "port": port, 'files': files}
+
+
+        except Exception as e:
+            return_dict = {}
+            print(e)
+
+    return return_dict
+
+
+def check_rethink(c, i, search, config):
     return_dict = {}
 
     ip = i['target']['ip']
@@ -482,7 +539,7 @@ def check_rethink(c, i, search):
     return return_dict
 
 
-def check_cassandra(c, i, search):
+def check_cassandra(c, i, search, config):
     return_dict = {}
     ip = i['target']['ip']
     port = i['target']['port']
@@ -503,13 +560,14 @@ def check_cassandra(c, i, search):
     return return_dict
 
 
-def check_ftp(c,i, search, keyword):
+def check_ftp(c,i, search, keyword, config):
     return_dict = {}
     files = []
     ip = i['target']['ip']
     port = i['target']['port']
 
 
+    indicator = []
     if Ftp.objects.filter(ip=ip).exists():
         pass
     elif ip in config['config']['blacklist']:
@@ -517,15 +575,23 @@ def check_ftp(c,i, search, keyword):
     else:
         try:
             for j in i['result']['data']['content']:
-
+                if keyword in j['name'].lower():
+                    indicator.append(j['name'])
                 if j['type'] == "d":
                     files.append(j['name'])
                     if 'content' in j:
                         for k in j['content']:
+                            if keyword in k['name'].lower():
+                                indicator.append(j['name'])
+                                indicator.append(k['name'])
                             if k['type'] == "d":
                                 files.append(k['name'])
                                 if 'content' in k:
                                     for l in k['content']:
+                                        if keyword in k['name'].lower():
+                                            indicator.append(j['name'])
+                                            indicator.append(k['name'])
+                                            indicator.append(l['name'])
                                         if l['type'] == 'd':
                                             files.append(l['name'])
 
@@ -534,7 +600,7 @@ def check_ftp(c,i, search, keyword):
             if ".." in files:
                 files.remove("..")
 
-            device = Ftp(search=search, ip=ip, port=port, files=files)
+            device = Ftp(search=search, ip=ip, port=port, files=files, indicator=indicator)
             device.save()
             return_dict[c] = {"ip": ip, "port": port, 'files': files}
 
@@ -546,7 +612,7 @@ def check_ftp(c,i, search, keyword):
 
 
 
-def check_kibana(c, i, search):
+def check_kibana(c, i, search, config):
     return_dict = {}
     ip = i['target']['ip']
     port = i['target']['port']
@@ -563,7 +629,7 @@ def check_kibana(c, i, search):
     return return_dict
 
 
-def check_couchdb(c, i, search):
+def check_couchdb(c, i, search, config):
     return_dict = {}
     ip = i['target']['ip']
     port = i['target']['port']
@@ -580,7 +646,7 @@ def check_couchdb(c, i, search):
     return return_dict
 
 
-def check_sonarqube(c, i, search):
+def check_sonarqube(c, i, search, config):
     return_dict = {}
     ip = i['target']['ip']
     url = ""
@@ -600,7 +666,7 @@ def check_sonarqube(c, i, search):
     return return_dict
 
 
-def check_rsync(c, i, search):
+def check_rsync(c, i, search, config):
     return_dict = {}
     shares = []
     ip = i['target']['ip']
@@ -618,19 +684,18 @@ def check_rsync(c, i, search):
         except Exception as e:
             print(e)
 
-
-
     return_dict[c] = {"ip": ip, "port": port, "shares": shares}
 
     return return_dict
 
 
-def check_jenkins(c, i, search):
+def check_jenkins(c, i, search, keyword, config):
     return_dict = {}
     jobs = []
     ip = i['target']['ip']
     port = i['target']['port']
     url = ""
+    indicators = []
 
     if Jenkins.objects.filter(ip=ip).exists() or ip in config['config']['blacklist']:
         pass
@@ -645,10 +710,22 @@ def check_jenkins(c, i, search):
                 else:
                     html_code = i['result']['data']['response']['body']['content']
 
-                jobs = extract_jobs(html_code)
+                jobs = []
+                try:
+                    soup = BeautifulSoup(html_code, features="html.parser")
+
+                    for project in soup.find_all("a", {"class": "model-link inside"}):
+                        if project['href'].startswith("job"):
+                            splitted = project['href'].split("/")
+                            if keyword in splitted[1].lower():
+                                indicators.append(splitted[1])
+
+                            jobs.append(splitted[1])
+                except Exception as e:
+                    pass
             except Exception as e:
-                print(e)
-        device = Jenkins(search=search, url=url, ip=ip, port=port, jobs=jobs)
+                pass
+        device = Jenkins(search=search, url=url, ip=ip, port=port, jobs=jobs, indicator=indicators)
         device.save()
 
         return_dict[c] = {"url": url, "ip": ip, "port": port, "jobs": jobs}
@@ -656,13 +733,14 @@ def check_jenkins(c, i, search):
     return return_dict
 
 @app.task
-def check_mongo(c, i, search):
+def check_mongo(c, i, search, keyword, config):
     return_dict = {}
     dbs = []
     ip = i['target']['ip']
     url = ""
     port = i['target']['port']
-    size = 0
+    bytes_size = 0
+    indicators = []
 
     if Mongo.objects.filter(ip=ip).exists() or ip in config['config']['blacklist']:
         pass
@@ -676,58 +754,29 @@ def check_mongo(c, i, search):
         if not i['result']['error']:
             if 'databases' in i['result']['data']['listDatabases']:
                 for k in i['result']['data']['listDatabases']['databases']:
-                    size = size + k['sizeOnDisk']
+                    bytes_size = bytes_size + k['sizeOnDisk']
                     if not "<script>" in k['name']:
+                        if keyword in k['name'].lower():
+                            indicators.append(k['name'])
                         dbs.append(k['name'])
 
-        device = Mongo(search=search, ip=ip, port=port, databases=dbs, size=str(size))
+        new_size = size(bytes_size)
+
+        device = Mongo(search=search, ip=ip, port=port, databases=dbs, size=str(new_size), indicator = indicators)
         device.save()
 
         return_dict[c] = {"url": url, "ip": ip, "port": port, 'databases': dbs, "size": str(size)}
 
     return return_dict
 
-
-def extract_jobs(content):
-    jobs = []
-    try:
-        soup = BeautifulSoup(content, features="html.parser")
-
-        for project in soup.find_all("a", {"class": "model-link inside"}):
-            if project['href'].startswith("job"):
-                splitted = project['href'].split("/")
-                jobs.append(splitted[1])
-
-        return jobs
-    except Exception as e:
-        print(e)
-        return jobs
-
-
-def extract_dirs(content):
-    dirs = []
-    try:
-        soup = BeautifulSoup(content, features="html.parser")
-
-        for project in soup.find_all("a", href=True):
-            if project.contents[0] == "Name" or project.contents[0] == "Last modified" or project.contents[
-                0] == "Size" or project.contents[0] == "Description":
-                pass
-            else:
-                dirs.append(str(project.contents[0]))
-
-        return dirs
-    except Exception as e:
-        print(e)
-        return dirs
-
 @app.task
-def check_dir(c, i, search):
+def check_dir(c, i, search, keyword, config):
     return_dict = {}
     ip = i['target']['ip']
     url = ""
     dirs = ""
     html_code = ""
+    indicators = []
 
     port = i['target']['port']
 
@@ -745,12 +794,25 @@ def check_dir(c, i, search):
                 else:
                     html_code = i['result']['data']['response']['body']['content']
 
-                dirs = extract_dirs(html_code)
+                dirs = []
+                try:
+                    soup = BeautifulSoup(html_code, features="html.parser")
+
+                    for project in soup.find_all("a", href=True):
+                        if project.contents[0] == "Name" or project.contents[0] == "Last modified" or project.contents[
+                            0] == "Size" or project.contents[0] == "Description":
+                            pass
+                        else:
+                            if keyword in str(project.contents[0].lower()):
+                                indicators.append(str(project.contents[0]))
+                            dirs.append(str(project.contents[0]))
+                except Exception as e:
+                    print(e)
             except Exception as e:
                 print(e)
 
         # print(dirs)
-        device = Dirs(search=search, url=url, ip=ip, port=port, dirs=dirs)
+        device = Dirs(search=search, url=url, ip=ip, port=port, dirs=dirs, indicator=indicators)
         device.save()
 
         return_dict[c] = {"url": url, "ip": ip, "port": port, 'dirs': dirs}
@@ -758,7 +820,7 @@ def check_dir(c, i, search):
     return return_dict
 
 @app.task
-def check_elastic(c, i, search):
+def check_elastic(c, i, search, keyword, config):
     return_dict = {}
     indices_list = []
     bytes_size = 0
@@ -766,6 +828,7 @@ def check_elastic(c, i, search):
     ip = i['target']['ip']
     name = i['result']['data']['cluster_name']
     port = i['target']['port']
+    indicators = []
 
     if Elastic.objects.filter(ip=ip).exists() or ip in config['config']['blacklist']:
         pass
@@ -774,10 +837,13 @@ def check_elastic(c, i, search):
             for indice in i['result']['data']['indices']:
                 bytes_size = bytes_size + indice['size_in_bytes']
                 if not "<script>" in indice['index_name']:
+                    if keyword in indice['index_name'].lower():
+                        indicators.append(indice['index_name'])
                     indices_list.append(indice['index_name'])
 
             new_size = size(bytes_size)
-            device = Elastic(search=search, name=name, ip=ip, port=port, size=new_size, indices=indices_list)
+            device = Elastic(search=search, name=name, ip=ip, port=port, size=new_size, indices=indices_list,
+                             indicator=indicators)
             device.save()
             return_dict[c] = {"name": name, "ip": ip, "port": port, 'size': new_size, "indice": indices_list}
         except Exception as e:
@@ -787,7 +853,7 @@ def check_elastic(c, i, search):
     return return_dict
 
 
-def check_gitlab(c, i, search):
+def check_gitlab(c, i, search, config):
     return_dict = {}
 
     ip = i['target']['ip']
@@ -816,7 +882,7 @@ def parse_bucket(link):
     else:
         return urlparse(link).hostname
 
-def check_keys(c,i,search):
+def check_keys(c,i,search, config):
     return_dict = {}
 
     ip = i['target']['ip']
@@ -857,7 +923,7 @@ def shannon_entropy(data, iterator):
     return entropy
 
 
-def check_amazonbe(c,i,search):
+def check_amazonbe(c,i,search, config):
     return_dict = {}
 
     ip = i['target']['ip']

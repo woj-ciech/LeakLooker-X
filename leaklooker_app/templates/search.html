@@ -289,7 +289,7 @@
       {% endif %}
                         <center><button id='submit' class="btn-lg btn-success notika-btn-success waves-effect">Search</button></center>
                                 <br>
-                                <center><p id="total">Total</p></center>
+                                <center><p id="total" style="color:black">Total</p></center>
                                             </form>
      <div class="progress-bar wow" id="pgrbar"  style="width: 0%"> <span></span>
                                                 </div>
@@ -318,6 +318,8 @@
                                         <th>Bucket</th>
                                         {% elif type == "amazonbe" %}
                                         <th>Buckets</th>
+                                        {% elif type == "amazons3be" %}
+                                        <th>Files</th>
                                         {% elif type == "keys" %}
                                         <th>Title</th>
                                         {% elif type == "gitlab" %}
@@ -486,19 +488,18 @@ function get_task_info(task_id) {
                     document.getElementById("total").innerHTML = "<h1>" + data.result.events + "</h1>" + Math.round(data.result.events / 20) + " pages";
 
                     for (var key in data.result.results) {
-
+                        if (key !== null) {
                         if (Object.keys(data.result.results[key]).length === 0) {
                             empty = empty + 1
 
                         }
-
+}
 
                         try
                          {
-                            console.log(data.result.type);
                             if (data.result.type == "gitlab") {
 
-                                $('#bsc-tbl-st tbody').append("<tr><td>" + data.result[key][key]['ip'] + "</td><td>" + data.result[key][key]['port'] + "</td><td>" + data.result[key][key]['url'] + "</td><td>");
+                                $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['url'] + "</td><td>");
                             }
                             if (data.result.type == "keys") {
 
@@ -560,6 +561,24 @@ function get_task_info(task_id) {
         var text = "";
         for (var i = 0; i < data.result.results[key][key]['files'].length; i++) {
             text += data.result.results[key][key]['files'][i] + "<br>";
+        }
+
+
+
+
+
+         $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + text + "</td><td>");
+
+
+                            }
+                            if (data.result.type == "amazons3be") {
+
+
+        var text = "";
+        for (var i = 0; i < data.result.results[key][key]['files'].length; i++) {
+            if (data.result.results[key][key]['files'][i]){
+            text += data.result.results[key][key]['files'][i] + "<br>";
+            }
         }
 
 

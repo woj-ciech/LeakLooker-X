@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from leaklooker_app import forms
-from leaklooker_app.models import Search, Gitlab, Elastic, Rethink, Mongo, Cassandra, Monitor, Ftp, AmazonBuckets, Github
+from leaklooker_app.models import Search, Amazons3be, Gitlab, Elastic, Rethink, Mongo, Cassandra, Monitor, Ftp, AmazonBuckets, Github
 from leaklooker import tasks
 from leaklooker.tasks import check_main
 from django.apps import apps

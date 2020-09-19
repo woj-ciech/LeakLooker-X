@@ -27,6 +27,8 @@ class Ftp(models.Model):
     confirmed = models.BooleanField(default=False)
     for_later = models.BooleanField(default=False)
     files = models.CharField(max_length=10000)
+    indicator = models.CharField(max_length=10000)
+
 
 class Elastic(models.Model):
     search = models.ForeignKey(Search, on_delete=models.CASCADE)
@@ -37,6 +39,8 @@ class Elastic(models.Model):
     for_later = models.BooleanField(default=False)
     indices =models.CharField(max_length=10000)
     size = models.CharField(max_length=100)
+    indicator = models.CharField(max_length=10000)
+
 
 class Keys(models.Model):
     search = models.ForeignKey(Search, on_delete=models.CASCADE)
@@ -75,6 +79,7 @@ class Dirs(models.Model):
     for_later = models.BooleanField(default=False)
     dirs = models.CharField(max_length=10000)
     url = models.CharField(max_length=100)
+    indicator = models.CharField(max_length=10000)
 
 class Jenkins(models.Model):
     search = models.ForeignKey(Search, on_delete=models.CASCADE)
@@ -84,6 +89,17 @@ class Jenkins(models.Model):
     for_later = models.BooleanField(default=False)
     jobs = models.CharField(max_length=10000)
     url = models.CharField(max_length=100)
+    indicator = models.CharField(max_length=10000)
+
+class Amazons3be(models.Model):
+    search = models.ForeignKey(Search, on_delete=models.CASCADE)
+    ip = models.CharField(max_length=100)
+    port = models.CharField(max_length=100)
+    confirmed = models.BooleanField(default=False)
+    for_later = models.BooleanField(default=False)
+    files = models.CharField(max_length=10000)
+    url = models.CharField(max_length=100)
+    indicator = models.CharField(max_length=10000)
 
 class Mongo(models.Model):
     search = models.ForeignKey(Search, on_delete=models.CASCADE)
@@ -93,6 +109,8 @@ class Mongo(models.Model):
     for_later = models.BooleanField(default=False)
     databases = models.CharField(max_length=10000)
     size = models.CharField(max_length=100)
+    indicator = models.CharField(max_length=10000)
+
 
 class Rsync(models.Model):
     search = models.ForeignKey(Search, on_delete=models.CASCADE)

@@ -101,7 +101,7 @@
                     <ul class="nav nav-tabs notika-menu-wrap menu-it-icon-pro">
                         <li ><a href="{% url 'index' %}"><i class="notika-icon notika-house"></i> Home</a>
                         </li>
-                        <li class="active"><a data-toggle="tab" href="#search"><i class="notika-icon notika-search"></i> Search</a>
+                        <li><a data-toggle="tab" href="#search"><i class="notika-icon notika-search"></i> Search</a>
                         </li>
                         <li><a href="{% url 'database' %}"><i class="notika-icon notika-edit"></i> Database</a>
                         </li>
@@ -141,46 +141,67 @@
                                     <tr>
                                         {% if type != "github" %}
                                         <th>Keyword</th>
-                                        <th>IP</th>
+
                                         {% endif %}
                                 {% if type == "elastic" %}
+                                        <th>IP</th>
                                         <th>Cluster Name</th>
                                         <th>Size</th>
+                                        <th>Indicator</th>
                                         <th>Indices</th>
                                         {% elif type == "dirs" %}
                                                                                 <th>URL</th>
+                                        <th>Indicator</th>
                                         <th>Directories</th>
                                         {% elif type == "ftp" %}
-                                                                 <th>Link</th>
+                                                                 <th>URL</th>
+                                                                <th>Indicator</th>
                                         <th>Directories</th>
                                         {% elif type == "jenkins" %}
                                         <th>URL</th>
+                                        <th>Indicator</th>
                                         <th>Jobs</th>
                                         {% elif type == "keys" %}
+                                        <th>IP</th>
                                         <th>Title</th>
                                         {% elif type == "mongo" %}
+                                        <th>IP</th>
                                                                                 <th>Size</th>
-
+                                        <th>Indicator</th>
                                         <th>Databases</th>
                                           {% elif type == "amazonbe" %}
+                                        <th>IP</th>
                                                                                 <th>Buckets</th>
+                                        {% elif type == "amazons3be" %}
+                                        <th>IP</th>
+                                                                                <th>Indicator</th>
+                                        <th>Files</th>
+                                        {% elif type == "kibana" %}
+                                        <th>IP</th>
+                                        {% elif type == "sonarqube" %}
+                                        <th>IP</th>
                                         {% elif type == "rethink" %}
+                                        <th>IP</th>
                                         <th>Databases</th>
-                                        {% elif type == "gitlab" %}
-                                        <th>URL</th>
                                         {% elif type == "cassandra" %}
+                                        <th>IP</th>
                                                                                 <th>Keyspaces</th>
 
                                         {% elif type == "rsync" %}
+                                        <th>IP</th>
+
                                                                                 <th>Shares</th>
                                         {% elif type == "amazonbuckets" %}
                                                                                 <th>Bucket</th>
+                                        {% elif type == "gitlab" %}
+                                        <th>IP</th>
+                                        {% elif type == "couchdb" %}
+                                        <th>IP</th>
                                         {% elif type == "github" %}
                                                                                 <th>Commit</th>
                                          <th>Secret</th>
                                          <th>Path</th>
-                                        {% elif type == "kibana" %}
-                                                                                <th>Url</th>
+
 
                                         {% else %}
                                         {% endif %}
@@ -208,17 +229,19 @@
 
 
                                         <td> {{ git.search.keyword }} {{ git.search.country }} {{ git.search.network }}</td>
-                                        <td style="word-wrap: break-word">
-                                            {% if git.port == 443 or git.port == 8443 %}
-                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
-                                            {% else %}
-                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
-                                            {% endif %}
-                                            </td>
+
                                 {% endif %}
                                 {% if type == "elastic" %}
+                                <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}/_cat/indices">https://{{ git.ip }}:{{ git.port }}/_cat/indices</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}/_cat/indices">http://{{ git.ip }}:{{ git.port }}/_cat/indices</a>
+                                            {% endif %}
+                                            </td>
                                 <td>{{ git.name }}</td>
                                 <td>{{ git.size }}</td>
+                                <td>{{ git.indicator|slice:"1:-1"|new_line|safe }}</td>
                                 <td style="word-wrap: break-word">{{ git.indices|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "github" %}
                                 <td style="word-wrap: break-word">{{ git.keyword }}/commit/{{ git.commit }}</td>
@@ -227,36 +250,123 @@
                                 <td> </td>
 
                                 {% elif type == "dirs" %}
-                                                                <td>{{ git.url }}</td>
+                                                                <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
+                                <td>{{ git.indicator|slice:"1:-1"|new_line|safe }}</td>
 
                                                                 <td style="word-wrap: break-word">{{ git.dirs|slice:"1:-1"|new_line|safe }}</td>
+
+                                {% elif type == 'sonarqube' %}
+                                        <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
                                 {% elif type == "ftp" %}
+
                                                                 <td><a href="ftp://{{git.ip}}:{{git.port}}">ftp://{{git.ip}}:{{git.port}}</a></td>
+                                <td>{{ git.indicator|slice:"1:-1"|new_line|safe }}</td>
 
                                                                 <td style="word-wrap: break-word"> {{ git.files|slice:"1:-1"|new_line|safe }}</td>
+                                {% elif type == "amazons3be" %}
+
+ <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>                                <td>{{ git.indicator|slice:"1:-1"|new_line|safe }}</td>
+
+                                                                <td style="word-wrap: break-word"> {{ git.files|slice:"1:-1"|new_line|safe }}</td>
+
                                 {% elif type == "jenkins" %}
-                                                                <td>{{ git.url }}</td>
+                                                                <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
+                                <td>{{ git.indicator|slice:"1:-1"|new_line|safe }}</td>
 
                                                                 <td style="word-wrap: break-word">{{ git.jobs|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "gitlab" %}
-                                                                <td>{{ git.url }}</td>
+                                 <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
                                 {% elif type == "mongo" %}
+                                <td>{{ git.ip }}:{{ git.port }}</td>
                                 <td>{{ git.size }}</td>
+                                <td>{{ git.indicator|slice:"1:-1"|new_line|safe }}</td>
 
                                                                 <td style="word-wrap: break-word">{{ git.databases|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "rsync" %}
+                                                                <td>{{ git.ip }}:{{ git.port }}</td>
+
                                 <td>{{ git.shares }}</td>
                                 {% elif type == "amazonbe" %}
+                                                 <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
                                 <td style="word-wrap: break-word"><a href='https://{{ git.buckets|slice:"1:-1"|new_line|safe|replace }}'>https://{{ git.buckets|slice:"1:-1"|new_line|safe|replace }}</a> </td>
                                 {% elif type == "rethink" %}
+                                                 <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
                                 <td style="word-wrap: break-word">{{ git.databases|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "keys" %}
+                                                 <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
                                 <td>{{ git.title }}</td>
                                 {% elif type == "couchdb" %}
-                                <td>http://{{ git.ip }}:{{ git.port }}/_all_dbs</td>
+                                                 <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}/_all_dbs">https://{{ git.ip }}:{{ git.port }}/_all_dbs</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}/_all_dbs">http://{{ git.ip }}:{{ git.port }}/_all_dbs</a>
+                                            {% endif %}
+                                            </td>
                                 {% elif type == "kibana" %}
-                                <td style="word-wrap: break-word">http://{{ git.ip }}:{{ git.port }}/app/kibana#/discover?_g=()</td>
+                                 <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
                                 {% elif type == "cassandra" %}
+                                 <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
                                 <td style="word-wrap: break-word"> {{ git.keyspaces|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "amazonbuckets" %}
                                 <td style="word-wrap: break-word"> <a href='https://{{ git.bucket|slice:"1:-1"|new_line|safe|replace }}'>https://{{ git.bucket }}</a></td>
