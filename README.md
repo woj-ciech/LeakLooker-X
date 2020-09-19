@@ -138,6 +138,7 @@ It compares new results with database and blacklist and sends only new findings.
 "stripe":'web.body.content:"STRIPE_KEY"',
 "secret_key":'web.body.content:"secret_key" -web.title:swagger',
 'google_api_key':'web.body.content:"google_api_key"'
+'amazons3be':'web.body.content:ListBucketResult'
 ```
 
 # Additional
