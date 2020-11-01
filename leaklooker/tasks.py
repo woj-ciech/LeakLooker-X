@@ -16,6 +16,18 @@ import ast
 import email.message
 import math
 import re
+import jsbeautifier
+from gzip import GzipFile
+import ssl
+
+try:
+    from StringIO import StringIO
+    readBytesCustom = StringIO
+except ImportError:
+    from io import BytesIO
+    readBytesCustom = BytesIO
+
+from urllib.request import Request, urlopen
 
 import hashlib
 from urllib.parse import urlparse
@@ -24,7 +36,7 @@ import jxmlease
 
 
 from leaklooker_app.models import Monitor, Search, Rethink, Cassandra, Gitlab, Elastic, Dirs, Jenkins, Mongo, Rsync, \
-    Sonarqube, Couchdb, Kibana, Ftp, Amazonbe, AmazonBuckets, Keys, Github, Amazons3be
+    Sonarqube, Couchdb, Kibana, Ftp, Amazonbe, AmazonBuckets, Keys, Github, Amazons3be, Angular, Javascript
 
 app = celery.Celery('leaklooker', broker="redis://localhost:6379")
 
@@ -34,7 +46,67 @@ def get_config():
 
     return config_dict
 
+regex_str = r"""
+  (?:"|')                               # Start newline delimiter
+  (
+    ((?:[a-zA-Z]{1,10}://|//)           # Match a scheme [a-Z]*1-10 or //
+    [^"'/]{1,}\.                        # Match a domainname (any character + dot)
+    [a-zA-Z]{2,}[^"']{0,})              # The domainextension and/or path
+    |
+    ((?:/|\.\./|\./)                    # Start with /,../,./
+    [^"'><,;| *()(%%$^/\\\[\]]          # Next character can't be...
+    [^"'><,;|()]{1,})                   # Rest of the characters can't be
+    |
+    ([a-zA-Z0-9_\-/]{1,}/               # Relative endpoint with /
+    [a-zA-Z0-9_\-/]{1,}                 # Resource name
+    \.(?:[a-zA-Z]{1,4}|action)          # Rest + extension (length 1-4 or action)
+    (?:[\?|#][^"|']{0,}|))              # ? or # mark with parameters
+    |
+    ([a-zA-Z0-9_\-/]{1,}/               # REST API (no extension) with /
+    [a-zA-Z0-9_\-/]{3,}                 # Proper REST endpoints usually have 3+ chars
+    (?:[\?|#][^"|']{0,}|))              # ? or # mark with parameters
+    |
+    AIza[0-9A-Za-z-_]{35}
+    |
+    (xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32})
+    |
+    AKIA[0-9A-Z]{16}
+    |
+    amzn\.mws\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
+    |
+    EAACEdEose0cBA[0-9A-Za-z]+
+    |
+    [f|F][a|A][c|C][e|E][b|B][o|O][o|O][k|K].*['|"][0-9a-f]{32}['|"]
+    |
+    [g|G][i|I][t|T][h|H][u|U][b|B].*['|"][0-9a-zA-Z]{35,40}['|"]
+    |
+    [a|A][p|P][i|I][_]?[k|K][e|E][y|Y].*['|"][0-9a-zA-Z]{32,45}['|"]
+    |
+    [s|S][e|E][c|C][r|R][e|E][t|T].*['|"][0-9a-zA-Z]{32,45}['|"]
+    |
+    [0-9]+-[0-9A-Za-z_]{32}\.apps\.googleusercontent\.com
+    |
+    ya29\.[0-9A-Za-z\-_]+
+    |
+    [h|H][e|E][r|R][o|O][k|K][u|U].*[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}
+    |
+    [a-zA-Z]{3,10}://[^/\s:@]{3,20}:[^/\s:@]{3,20}@.{1,100}["'\s]
+    |
+    sk_live_[0-9a-zA-Z]{24}
+    |
+    https://hooks.slack.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}
+    |
+    [t|T][w|W][i|I][t|T][t|T][e|E][r|R].*[1-9][0-9]+-[0-9a-zA-Z]{40}
+    |
+    ([a-zA-Z0-9_\-]{1,}                 # filename
+    \.(?:php|asp|aspx|jsp|json|
+         action|html|js|txt|xml)        # . + extension
+    (?:[\?|#][^"|']{0,}|))              # ? or # mark with parameters
+  )
+  (?:"|')                               # End newline delimiter
+"""
 
+context_delimiter_str = "\n"
 
 queries = {"gitlab": "title:%22gitlab%22%20AND%20web.body.content:%22register%22",
            "elastic": "type:%22elasticsearch%22",
@@ -55,7 +127,8 @@ queries = {"gitlab": "title:%22gitlab%22%20AND%20web.body.content:%22register%22
            "stripe":'web.body.content:"STRIPE_KEY"',
            "secret_key":'web.body.content:"secret_key" -web.title:swagger',
            'google_api_key':'web.body.content:"google_api_key"',
-           'amazons3be':"web.body.content:ListBucketResult"}
+           'amazons3be':"web.body.content:ListBucketResult",
+           'angular':"web.body.content:polyfills web.body.content:main web.body.content:runtime"}
 
 buckets_all = ["s3.ap-southeast-1.amazonaws.com","s3.ap-southeast-2.amazonaws.com","s3-eu-west-1.amazonaws.com","s3-eu-west-2.amazonaws.com","s3-us-west-2.amazonaws.com","s3-us-west-1.amazonaws.com"]
 keys_all = ['api_key','stripe','secret_key','google_api_key']
@@ -149,6 +222,17 @@ def check_main(self, fk, keyword=None, country=None, network=None, page=None, ty
             results_elastic = check_elastic(c, i, search,keyword=keyword, config=config)
             progress_recorder.set_progress(c + 1, total=total)
             results[c] = results_elastic
+
+        self.update_state(state="SUCCESS",
+                          meta={"type": type.lower(), "total": total, 'events': events, 'results': results})
+
+        raise Ignore()
+
+    if type.lower() == "angular":
+        for c, i in enumerate(req_json['events']):
+            results_angular = check_angular(c, i, search,keyword=keyword, config=config)
+            progress_recorder.set_progress(c + 1, total=total)
+            results[c] = results_angular
 
         self.update_state(state="SUCCESS",
                           meta={"type": type.lower(), "total": total, 'events': events, 'results': results})
@@ -769,6 +853,62 @@ def check_mongo(c, i, search, keyword, config):
 
     return return_dict
 
+def parser_file(content, regex_str, keyword, mode=1, more_regex=None, no_dup=1):
+    '''
+    Parse Input
+    content:    string of content to be searched
+    regex_str:  string of regex (The link should be in the group(1))
+    mode:       mode of parsing. Set 1 to include surrounding contexts in the result
+    more_regex: string of regex to filter the result
+    no_dup:     remove duplicated link (context is NOT counted)
+    Return the list of ["link": link, "context": context]
+    The context is optional if mode=1 is provided.
+    '''
+    global context_delimiter_str
+
+    ip = keyword.split("/")
+    if mode == 1:
+        # Beautify
+        if len(content) > 1000000:
+            content = content.replace(";",";\r\n").replace(",",",\r\n")
+            with open(ip[2] +".js",'w') as f:
+                f.write(content)
+        else:
+            content = jsbeautifier.beautify(content)
+            with open(ip[2] +".js",'w') as f:
+                f.write(content)
+
+    regex = re.compile(regex_str, re.VERBOSE)
+
+    if mode == 1:
+        all_matches = [(m.group(1), m.start(0), m.end(0)) for m in re.finditer(regex, content)]
+        items = getContext(all_matches, content, context_delimiter_str=context_delimiter_str)
+    else:
+        items = [{"link": m.group(1)} for m in re.finditer(regex, content)]
+
+    if no_dup:
+        # Remove duplication
+        all_links = set()
+        no_dup_items = []
+        for item in items:
+            if item["link"] not in all_links:
+                all_links.add(item["link"])
+                no_dup_items.append(item)
+        items = no_dup_items
+
+    # Match Regex
+    filtered_items = []
+    for item in items:
+        # Remove other capture groups from regex results
+        if more_regex:
+            if re.search(more_regex, item["link"]):
+                filtered_items.append(item)
+        else:
+            filtered_items.append(item)
+
+    return filtered_items
+
+
 @app.task
 def check_dir(c, i, search, keyword, config):
     return_dict = {}
@@ -819,6 +959,72 @@ def check_dir(c, i, search, keyword, config):
 
     return return_dict
 
+def send_request(url):
+    '''
+    Send requests with Requests
+    '''
+    q = Request(url)
+
+    q.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+        AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36')
+    q.add_header('Accept', 'text/html,\
+        application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
+    q.add_header('Accept-Language', 'en-US,en;q=0.8')
+    q.add_header('Accept-Encoding', 'gzip')
+
+    try:
+        sslcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        response = urlopen(q, context=sslcontext)
+    except:
+        sslcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        response = urlopen(q, context=sslcontext)
+
+    if response.info().get('Content-Encoding') == 'gzip':
+        data = GzipFile(fileobj=readBytesCustom(response.read())).read()
+    elif response.info().get('Content-Encoding') == 'deflate':
+        data = response.read().read()
+    else:
+        data = response.read()
+
+    return data.decode('utf-8', 'replace')
+
+@app.task
+def check_angular(c,i,search,keyword,config):
+    return_dict = {}
+
+    ip = i['target']['ip']
+    port = i['target']['port']
+    path = ""
+    title = ""
+    if Angular.objects.filter(ip=ip).exists() or ip in config['config']['blacklist']:
+        pass
+    else:
+        try:
+            html = i['result']['data']['response']['body']['content']
+            soup = BeautifulSoup(html)
+
+            for src in soup.find_all('script', {"src": True}):
+                if 'main' in src['src']:
+                    path = i['target']['ip'] + "/" + src['src']
+
+            for k in soup.find_all('title', limit=1):
+                title = (k.contents[0])
+
+            device = Angular(search=search, ip=ip, port=port, title=title, path = path)
+
+            device.save()
+
+            if port == 443:
+                pre = "https://"
+            else:
+                pre = "http://"
+            return_dict[c] = {"ip": ip, "port": port, 'title': title, 'path':pre+path}
+        except Exception as e:
+            print(e)
+
+    return return_dict
+
+
 @app.task
 def check_elastic(c, i, search, keyword, config):
     return_dict = {}
@@ -851,6 +1057,42 @@ def check_elastic(c, i, search, keyword, config):
 
 
     return return_dict
+
+def getContext(list_matches, content, include_delimiter=0, context_delimiter_str="\n"):
+    '''
+    Parse Input
+    list_matches:       list of tuple (link, start_index, end_index)
+    content:            content to search for the context
+    include_delimiter   Set 1 to include delimiter in context
+    '''
+    items = []
+    for m in list_matches:
+        match_str = m[0]
+        match_start = m[1]
+        match_end = m[2]
+        context_start_index = match_start
+        context_end_index = match_end
+        delimiter_len = len(context_delimiter_str)
+        content_max_index = len(content) - 1
+
+        while content[context_start_index] != context_delimiter_str and context_start_index > 0:
+            context_start_index = context_start_index - 1
+
+        while content[context_end_index] != context_delimiter_str and context_end_index < content_max_index:
+            context_end_index = context_end_index + 1
+
+        if include_delimiter:
+            context = content[context_start_index: context_end_index]
+        else:
+            context = content[context_start_index + delimiter_len: context_end_index]
+
+        item = {
+            "link": match_str,
+            "context": context
+        }
+        items.append(item)
+
+    return items
 
 
 def check_gitlab(c, i, search, config):
@@ -1080,6 +1322,27 @@ def rules(diff):
                         pass
 
     return path_secrets
+
+@shared_task(bind=True)
+def javascript_search(self, keyword):
+    ff = send_request(keyword)
+    enpoints = parser_file(ff, regex_str, keyword)
+
+    links = []
+    context = []
+
+    for i in enpoints:
+        links.append(i['link'])
+        context.append(i['context'])
+
+    js = Javascript(secrets=links, context=context, path=keyword)
+    js.save()
+
+    self.update_state(state="SUCCESS",
+                      meta={"type": 'js', "secrets": links, 'context':context,'path':keyword})
+
+    raise Ignore()
+
 
 @shared_task(bind=True)
 def github_repo_search(self,keyword):

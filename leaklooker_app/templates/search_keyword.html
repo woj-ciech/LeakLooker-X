@@ -188,6 +188,8 @@ padding: 5px;
                         <div class="multi-select__option" data-value="dirs">Dirs</div>
             <div class="multi-select__option" data-value="sonarqube">SonarQube</div>
             <div class="multi-select__option" data-value="rsync">Rsync</div>
+            <div class="multi-select__option" data-value="amazons3be">AmazonS3BE</div>
+            <div class="multi-select__option" data-value="angular">Angular</div>
 
 
 
@@ -217,6 +219,10 @@ padding: 5px;
                                 <p id="cassandra"></p>
                             <p id="rsync"></p>
                                 <p id="sonarqube"></p>
+                                                    <p id="angular"></p>
+                                                                        <p id="amazons3be"></p>
+
+
                     </div>
 <div class="table-responsive">
                             <table id="bsc-tbl-st" class="table table-striped">
@@ -353,6 +359,14 @@ padding: 5px;
         {
           label: "SonarQube",
           value: "sonarqube"
+        },
+        {
+          label: "Angular",
+          value: "angular"
+        },
+        {
+          label: "AmazonS3BE",
+          value: "amazons3be"
         },
         {
           label: "Rsync",
@@ -605,6 +619,10 @@ function get_task_info(task_id) {
                 if (data.result.type == "sonarqube"){
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.type + "</td><td>"   + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['url'] + "</td><td>");
             }
+            if (data.result.type == "angular") {
+
+                                $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['title'] + "</td><td>" + data.result.results[key][key]['path'] + "</td><td>");
+                            }
             if (data.result.type == "couchdb") {
                   $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.type + "</td><td>"   + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td></td><td>");
             }
@@ -612,6 +630,17 @@ function get_task_info(task_id) {
               $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.type + "</td><td>"   + data.result.results[key][key]['ip'] + "</td><td>"  + data.result.results[key][key]['port'] + "</td><td></td><td>");
 
             }
+            if (data.result.type == "amazons3be") {
+            var text = "";
+            for (var i = 0; i < data.result.results[key][key]['files'].length; i++) {
+            if (data.result.results[key][key]['files'][i]){
+                text += data.result.results[key][key]['files'][i] + "<br>";
+            }
+       $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + text + "</td><td>");
+
+
+                            }
+        }
             if (data.result.type == "cassandra"){
             var text = "";
         for (var i = 0; i < data.result.results[key][key]['keyspaces'].length; i++) {

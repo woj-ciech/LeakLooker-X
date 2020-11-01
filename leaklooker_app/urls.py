@@ -27,4 +27,7 @@ urlpatterns = [
     path('amazon_buckets/bruteforce', views.bruteforce_bucket, name="bruteforce_bucket"),
     path('github/', views.github, name="github"),
     path('github/github_repo', views.github_repo, name="github_repo"),
+    path('javascript/', views.js, name="javascript"),
+    path('javascript/javascript_file', views.js_file, name="javascript_file"),
+
 ]

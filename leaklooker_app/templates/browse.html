@@ -164,6 +164,10 @@
                                         {% elif type == "keys" %}
                                         <th>IP</th>
                                         <th>Title</th>
+                                        {% elif type == "angular" %}
+                                        <th>IP</th>
+                                        <th>Title</th>
+                                        <th>Path</th>
                                         {% elif type == "mongo" %}
                                         <th>IP</th>
                                                                                 <th>Size</th>
@@ -197,6 +201,10 @@
                                         <th>IP</th>
                                         {% elif type == "couchdb" %}
                                         <th>IP</th>
+                                        {% elif type == "javascript" %}
+                                        <th>IP</th>
+                                        <th>Secret</th>
+
                                         {% elif type == "github" %}
                                                                                 <th>Commit</th>
                                          <th>Secret</th>
@@ -269,7 +277,14 @@
                                             <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
                                             {% endif %}
                                             </td>
+                                {% elif type == 'javascript' %}
+                                        <td style="word-wrap: break-word">
+
+                                            <a href="http://{{ git.path }}">http://{{ git.path }}</a>
+                                            </td>
+                                             <td style="word-wrap: break-word">{{ git.secrets|slice:"1:-1"|new_line|safe }}</td>
                                 {% elif type == "ftp" %}
+
 
                                                                 <td><a href="ftp://{{git.ip}}:{{git.port}}">ftp://{{git.ip}}:{{git.port}}</a></td>
                                 <td>{{ git.indicator|slice:"1:-1"|new_line|safe }}</td>
@@ -343,6 +358,22 @@
                                             {% endif %}
                                             </td>
                                 <td>{{ git.title }}</td>
+                                {% elif type == "angular" %}
+                                                 <td style="word-wrap: break-word">
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.ip }}:{{ git.port }}">https://{{ git.ip }}:{{ git.port }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.ip }}:{{ git.port }}">http://{{ git.ip }}:{{ git.port }}</a>
+                                            {% endif %}
+                                            </td>
+                                <td>{{ git.title }}</td>
+                                <td>
+                                            {% if git.port == "443" or git.port == "8443" %}
+                                            <a href="https://{{ git.path }}">https://{{ git.path }}</a>
+                                            {% else %}
+                                            <a href="http://{{ git.path }}">http://{{ git.path }}</a>
+                                            {% endif %}
+                                            </td>
                                 {% elif type == "couchdb" %}
                                                  <td style="word-wrap: break-word">
                                             {% if git.port == "443" or git.port == "8443" %}
@@ -373,7 +404,7 @@
 
 
                                 {% endif %}
-                                                                        {% if type != "github" %}
+                                                                        {% if type != "github" or type != "javascript" %}
 
                                 <td>{{ git.search.created_on }}</td>
 {% endif %}

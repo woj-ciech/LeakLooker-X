@@ -12,7 +12,7 @@ import random
 from celery.result import AsyncResult
 
 
-types = ["gitlab","elastic","dirs","jenkins","mongo","rsync",'sonarqube','couchdb',"kibana","cassandra","rethink", "ftp"]
+types = ['angular','amazons3be',"gitlab","elastic","dirs","jenkins","mongo","rsync",'sonarqube','couchdb',"kibana","cassandra","rethink", "ftp"]
 
 def index(request):
 
@@ -345,6 +345,21 @@ def bruteforce_bucket(request):
 
 def github(request):
     return render(request, "github.html",{})
+
+def js(request):
+    return render(request, "js.html",{})
+
+def js_file(request):
+    if request.is_ajax() and request.method == "GET":
+        keyword = request.GET['keyword']
+        print(keyword)
+        gitlab_search_task = tasks.javascript_search.delay(keyword=keyword)
+
+        request.session['task_id'] = gitlab_search_task.task_id
+        return HttpResponse(json.dumps({'task_id': gitlab_search_task.task_id}), content_type='application/json')
+        # return HttpResponse(json.dumps(gitlab_search_task), content_type='application/json')
+    else:
+        return HttpResponse(json.dumps({'OK2': 'OK'}), content_type='application/json')
 
 def github_repo(request):
     if request.is_ajax() and request.method == "GET":

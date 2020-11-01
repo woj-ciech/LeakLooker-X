@@ -71,6 +71,14 @@ class Github(models.Model):
     for_later = models.BooleanField(default=False)
     keyword = models.CharField(max_length=10000)
 
+class Javascript(models.Model):
+    secrets = models.CharField(max_length=1000)
+    path = models.CharField(max_length=10000)
+    context = models.CharField(max_length=10000)
+    confirmed = models.BooleanField(default=False)
+    for_later = models.BooleanField(default=False)
+    keyword = models.CharField(max_length=10000)
+
 class Dirs(models.Model):
     search = models.ForeignKey(Search, on_delete=models.CASCADE)
     ip = models.CharField(max_length=100)
@@ -163,3 +171,14 @@ class Monitor(models.Model):
     network = models.CharField(max_length=100)
     types = models.CharField(max_length=1000)
     created_on = models.DateTimeField(auto_now_add=True)
+
+class Angular(models.Model):
+    search = models.ForeignKey(Search, on_delete=models.CASCADE)
+    ip = models.CharField(max_length=100)
+    port = models.CharField(max_length=100)
+    confirmed = models.BooleanField(default=False)
+    for_later = models.BooleanField(default=False)
+    title = models.CharField(max_length=1000, null=True)
+    path =models.CharField(max_length=1000, null=True)
+
+

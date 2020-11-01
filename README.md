@@ -12,6 +12,28 @@ https://www.offensiveosint.io/leaklooker-gui-discover-browse-and-monitor-databas
 
 ![](https://www.offensiveosint.io/content/images/2020/06/types.jpg)
 
+# Supported sources
+- Gitlab
+- Elasticsearch
+- Kibana
+- Sonarqube
+- Kibana
+- Jenkins
+- MongoDB
+- Rsync
+- Listing directory
+- Cassandra
+- CouchDB
+- RethinkDB
+- Anonymous FTP
+- S3 bruteforce
+- Open S3 buckets
+- Buckets in HTML
+- Github (Secrets)
+- API keys in HTML
+- Angular applications
+- Javascript (Secrets)
+
 # Requirements
 - python3
 - Binary Edge paid plan
@@ -19,6 +41,7 @@ https://www.offensiveosint.io/leaklooker-gui-discover-browse-and-monitor-databas
 - celery
 - redis
 - BeautifulSoup
+- jsbeautifier
 
 ~~~
 pip install -r requirements.txt
@@ -138,7 +161,8 @@ It compares new results with database and blacklist and sends only new findings.
 "stripe":'web.body.content:"STRIPE_KEY"',
 "secret_key":'web.body.content:"secret_key" -web.title:swagger',
 'google_api_key':'web.body.content:"google_api_key"'
-'amazons3be':'web.body.content:ListBucketResult'
+'amazons3be':'web.body.content:ListBucketResult',
+'angular':"web.body.content:polyfills web.body.content:main web.body.content:runtime"
 ```
 
 # Additional

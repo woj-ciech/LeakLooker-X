@@ -322,6 +322,9 @@
                                         <th>Files</th>
                                         {% elif type == "keys" %}
                                         <th>Title</th>
+                                        {% elif type == "angular" %}
+                                        <th>Title</th>
+                                        <th>Path</th>
                                         {% elif type == "gitlab" %}
                                         <th>URL</th>
                                         {% elif type == "mongo" %}
@@ -505,6 +508,10 @@ function get_task_info(task_id) {
 
                                 $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['title'] + "</td><td>");
                             }
+                            if (data.result.type == "angular") {
+
+                                $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + data.result.results[key][key]['title'] + "</td><td>" + data.result.results[key][key]['path'] + "</td><td>");
+                            }
                             if (data.result.type == "dirs") {
                                if (Array.isArray(data.result.results[key][key]['dirs'])) {
         for (var i = 0; i < data.result.results[key][key]['dirs'].length; i++) {
@@ -562,11 +569,6 @@ function get_task_info(task_id) {
         for (var i = 0; i < data.result.results[key][key]['files'].length; i++) {
             text += data.result.results[key][key]['files'][i] + "<br>";
         }
-
-
-
-
-
          $('#bsc-tbl-st tbody').append("<tr><td>" + data.result.results[key][key]['ip'] + "</td><td>" + data.result.results[key][key]['port'] + "</td><td>" + text + "</td><td>");
 
 
