@@ -1,4 +1,4 @@
-from celery import task
+from celery import shared_task
 import logging
 import json
 import requests
