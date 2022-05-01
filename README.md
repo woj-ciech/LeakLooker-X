@@ -45,6 +45,8 @@ https://www.offensiveosint.io/leaklooker-gui-discover-browse-and-monitor-databas
 
 ~~~
 pip install -r requirements.txt
+sudo apt-get install python3-jsbeautifier
+sudo pip3 install celery-progress hurry-filesize jxmlease
 ~~~ 
 
 # Install & Run
@@ -64,7 +66,7 @@ n a new window fire up redis
 
 In a new window (in main directory) run 
 
-```celery worker -A leaklooker --loglevel=info```
+```celery -A leaklooker worker --loglevel=info```
 
 For scheduling task (monitoring) run also 
 
